@@ -1,7 +1,7 @@
 /**
  * @file       sys_io.c
-* @copyright  Copyright (C) 2020 Hydratech. All rights reserved.
-* @license    This project is released under the Hydratech License.
+ * @copyright  Copyright (C) 2020 Hydratech. All rights reserved.
+ * @license    This project is released under the Hydratech License.
  * @version    1.0.0
  * @date       2022-02-18
  * @author     Thuan Le
@@ -31,14 +31,17 @@ static const char *TAG = "sys_wifi";
 
 /* Private variables -------------------------------------------------------- */
 /* Private function prototypes ---------------------------------------------- */
-static esp_err_t m_sys_wifi_event_handler(void *ctx, system_event_t *event);
+static void m_sys_wifi_event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data);
 static bool m_sys_wifi_connect(void);
 
 /* Function definitions ----------------------------------------------------- */
 void sys_wifi_init(void)
 {
   // Init TCP/IP stack
-  // TODO: Add init stack
+  ESP_ERROR_CHECK(esp_netif_init());
+
+  ESP_ERROR_CHECK(esp_event_loop_create_default());
+  esp_netif_create_default_wifi_sta();
 
   // Init ESP WiFi
   wifi_init_config_t wifi_init_cfg = WIFI_INIT_CONFIG_DEFAULT();
@@ -46,18 +49,31 @@ void sys_wifi_init(void)
 
   // Wifi ssid manager create
   // g_ssid_manager = wifi_ssid_manager_create(WIFI_MAX_STATION_NUM);
+
+  sys_wifi_update_event_handler();
 }
 
 void sys_wifi_connect(void)
 {
-  // ESP_ERROR_CHECK(esp_event_loop_init(m_sys_wifi_event_handler, NULL));
   ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
   ESP_ERROR_CHECK(esp_wifi_start());
 }
 
 void sys_wifi_update_event_handler(void)
 {
-  esp_event_loop_set_cb(m_sys_wifi_event_handler, NULL);
+  esp_event_handler_instance_t instance_any_id;
+  esp_event_handler_instance_t instance_got_ip;
+
+  ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
+                                                      ESP_EVENT_ANY_ID,
+                                                      &m_sys_wifi_event_handler,
+                                                      NULL,
+                                                      &instance_any_id));
+  ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT,
+                                                      IP_EVENT_STA_GOT_IP,
+                                                      &m_sys_wifi_event_handler,
+                                                      NULL,
+                                                      &instance_got_ip));
 }
 
 bool sys_wifi_is_connected(void)
@@ -123,6 +139,17 @@ static bool m_sys_wifi_connect(void)
   //   return false;
   // }
 
+  wifi_config_t wifi_config = {
+      .sta = {
+          .ssid = "A6.11",
+          .password = "Khongcomatkhau",
+          .threshold.authmode = WIFI_AUTH_WPA2_PSK,
+      },
+  };
+  ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
+
+  esp_wifi_connect();
+
   return true;
 }
 
@@ -135,22 +162,23 @@ static bool m_sys_wifi_connect(void)
  *
  * @return        esp_err_t
  */
-static esp_err_t m_sys_wifi_event_handler(void *ctx, system_event_t *event)
+static void m_sys_wifi_event_handler(void *arg, esp_event_base_t event_base,
+                                     int32_t event_id, void *event_data)
 {
-  switch (event->event_id)
+  switch (event_id)
   {
-  case SYSTEM_EVENT_STA_START:
+  case WIFI_EVENT_STA_START:
   {
     m_sys_wifi_connect();
     break;
   }
-  case SYSTEM_EVENT_STA_GOT_IP:
+  case IP_EVENT_STA_GOT_IP:
   {
     m_wifi.is_connected = true;
 
     break;
   }
-  case SYSTEM_EVENT_STA_DISCONNECTED:
+  case WIFI_EVENT_STA_DISCONNECTED:
   {
     m_wifi.is_connected = false;
     m_sys_wifi_connect(); // WORKAROUND: as ESP32 WiFi libs don't currently auto-reassociate
@@ -160,9 +188,6 @@ static esp_err_t m_sys_wifi_event_handler(void *ctx, system_event_t *event)
   default:
     break;
   }
-
-  return ESP_OK;
 }
-
 
 /* End of file -------------------------------------------------------- */

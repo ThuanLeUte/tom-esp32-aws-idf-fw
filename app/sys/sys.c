@@ -14,6 +14,7 @@
 #include "sys.h"
 #include "sys_wifi.h"
 #include "sys_aws_provision.h"
+#include "sys_nvs.h"
 
 /* Private defines ---------------------------------------------------- */
 static const char *TAG = "sys";
@@ -27,10 +28,14 @@ static const char *TAG = "sys";
 /* Function definitions ----------------------------------------------- */
 void sys_boot(void)
 {
+  sys_nvs_init();
+  sys_wifi_init();
+  sys_wifi_connect();
 }
 
 void sys_run(void)
 {
+  vTaskDelay(pdMS_TO_TICKS(1000));
 }
 
 /* End of file -------------------------------------------------------- */
