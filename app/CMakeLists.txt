@@ -2,13 +2,11 @@
 # in this exact order for cmake to work correctly
 cmake_minimum_required(VERSION 3.5)
 
-include($ENV{ADF_PATH}/CMakeLists.txt)
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 
 set(EXTRA_COMPONENT_DIRS "./sys" 
                          "./platform" 
-                         "$ENV{ADF_PATH}/components" 
                          "./components"
                          "./components/aws_iot")
 
-project(covid19-monitoring-system)
+project(esp32_aws_platform)

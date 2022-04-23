@@ -14,8 +14,7 @@ set(COMPONENT_ADD_INCLUDEDIRS .
                               "../build"
                               )
 
-set(COMPONENT_REQUIRES)
-set(COMPONENT_PRIV_REQUIRES  esp-adf-libs esp_peripherals audio_stream jsmn wifi_service)
+set(COMPONENT_REQUIRES nvs_flash jsmn spiffs)
 
 register_component()
 

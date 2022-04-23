@@ -11,6 +11,6 @@ set(COMPONENT_ADD_INCLUDEDIRS .
                               "./aws_iot/include")
 
 set(COMPONENT_REQUIRES)
-set(COMPONENT_PRIV_REQUIRES  esp-adf-libs esp_peripherals jsmn)
+set(COMPONENT_PRIV_REQUIRES  jsmn)
 
 register_component()

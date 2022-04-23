@@ -13,10 +13,8 @@
 /* Includes ----------------------------------------------------------------- */
 #include <sys/stat.h>
 #include "sys_aws_provision.h"
-#include "sys_aws_shadow.h"
 #include "sys_aws_config.h"
 #include "sys_nvs.h"
-#include "sys_aws.h"
 
 #include "platform_common.h"
 #include "aws_iot_config.h"

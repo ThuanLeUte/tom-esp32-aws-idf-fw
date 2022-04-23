@@ -22,6 +22,6 @@ set(COMPONENT_SRCS "${aws_sdk_dir}/aws_iot_jobs_interface.c"
                    "port/timer.c")
 
 set(COMPONENT_REQUIRES mbedtls)
-set(COMPONENT_PRIV_REQUIRES jsmn esp-adf-libs wifi_service)
+set(COMPONENT_PRIV_REQUIRES jsmn)
 
 register_component()

@@ -31,20 +31,15 @@ extern "C" {
 #include "freertos/semphr.h"
 #include "freertos/timers.h"
 #include "freertos/event_groups.h"
-#include "freertos/xtensa_api.h"
 
 // ESP32
 #include "esp_system.h"
 #include "esp_log.h"
 #include "esp_err.h"
-#include "esp_adc_cal.h"
 #include "esp_wifi.h"
 #include "esp_event.h"
-#include "esp_event_loop.h"
-#include "esp_peripherals.h"
-#include "i2c_bus.h"
+#include "esp_event.h"
 #include "driver/spi_master.h"
-#include "esp_vfs_fat.h"
 
 /* Public defines ----------------------------------------------------------- */
 #define CHECK(expr, ret)               \
@@ -65,7 +60,7 @@ extern "C" {
   } while (0)
 
 #define _CONFIG_ENVIRONMENT_DEV         (1)
-#define _CONFIG_ENVIRONMENT_PRODUCTION  (1)
+#define _CONFIG_ENVIRONMENT_PRODUCTION  (0)
 
 /* Public enumerate/structure ----------------------------------------------- */
 typedef enum
