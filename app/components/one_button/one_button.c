@@ -1,7 +1,7 @@
 /**
 * @file       one_button.c
-* @copyright  Copyright (C) 2020 ITR VN. All rights reserved.
-* @license    This project is released under the ITR License.
+* @copyright  Copyright (C) 2021 Hydratech. All rights reserved.
+* @license    This project is released under the Hydratech License.
 * @version    01.00.00
 * @date       2020-06-11
 * @author     Khang Vo

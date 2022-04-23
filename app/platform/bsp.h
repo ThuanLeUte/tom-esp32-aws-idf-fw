@@ -19,6 +19,8 @@ extern "C" {
 #endif
 
 /* Includes ----------------------------------------------------------------- */
+#include "platform_common.h"
+
 /* Public defines ----------------------------------------------------------- */
 /* Public enumerate/structure ----------------------------------------------- */
 typedef enum
@@ -57,6 +59,8 @@ bsp_error_t;
  * @return        None
  */
 void bsp_error_handler(bsp_error_t error);
+
+void bsp_delay_ms(uint32_t ms);
 
 /* -------------------------------------------------------------------------- */
 #ifdef __cplusplus

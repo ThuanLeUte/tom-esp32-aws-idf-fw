@@ -6,6 +6,7 @@ set(COMPONENT_SRCS "sys.c"
                    "sys_aws_shadow.c"
                    "sys_aws_mqtt.c"
                    "sys_aws.c"
+                   "sys_devcfg.c"
                    )
 
 set(COMPONENT_ADD_INCLUDEDIRS .
@@ -16,6 +17,7 @@ set(COMPONENT_ADD_INCLUDEDIRS .
                               "../components/blufi_security"
                               "../components/one_button"
                               "../components/protocol"
+                              "../components/lib_adf"
                               "../build"
                               )
 
@@ -25,7 +27,7 @@ set(COMPONENT_EMBED_TXTFILES certs/aws-root-ca.pem
                              )
  
 
-set(COMPONENT_REQUIRES nvs_flash jsmn spiffs)
+set(COMPONENT_REQUIRES nvs_flash jsmn spiffs bt)
 
 register_component()
 

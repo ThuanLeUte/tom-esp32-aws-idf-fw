@@ -22,9 +22,6 @@
 #include "aws_parser.h"
 
 /* Public defines ----------------------------------------------------- */
-#define FLAG_QRCODE_NOT_SET                (0x00)
-#define FLAG_QRCODE_SET                    (0x11)
-#define FLAG_QRCODE_SET_SUCCESS            (0x22)
 
 /* Public enumerate/structure ----------------------------------------- */
 /**

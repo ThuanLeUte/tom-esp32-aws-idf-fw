@@ -1,7 +1,7 @@
 /**
  * @file       sys_nvs.h
- * @copyright  Copyright (C) 2019 Fiot Co., Ltd. All rights reserved.
- * @license    This project is released under the Fiot License.
+ * @copyright  Copyright (C) 2020 Hydratech. All rights reserved.
+ * @license    This project is released under the Hydratech License.
  * @version    1.0.0
  * @date       2022-02-15
  * @author     Nhi Ngo

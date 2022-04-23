@@ -15,6 +15,7 @@
 #include "sys_aws.h"
 #include "sys_aws_job.h"
 #include "sys_aws_provision.h"
+#include "sys_devcfg.h"
 
 #include "platform_common.h"
 #include "aws_iot_config.h"
@@ -23,7 +24,6 @@
 #include "jsmn.h"
 #include "aws_iot_json_utils.h"
 #include "frozen.h"
-#include "sys_nvs.h"
 
 /* Private enum/structs ----------------------------------------------------- */
 static const char *AWS_JOB_OPERATION[] =

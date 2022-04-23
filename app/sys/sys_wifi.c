@@ -13,6 +13,7 @@
 /* Includes ----------------------------------------------------------------- */
 #include "sys_wifi.h"
 #include "sys_aws.h"
+#include "sys_devcfg.h"
 
 /* Private enum/structs ----------------------------------------------------- */
 static struct
@@ -32,7 +33,7 @@ static const char *TAG = "sys_wifi";
 
 /* Private variables -------------------------------------------------------- */
 /* Private function prototypes ---------------------------------------------- */
-static void m_sys_wifi_event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data);
+static esp_err_t m_sys_wifi_event_handler(void *ctx, system_event_t *event);
 static bool m_sys_wifi_connect(void);
 
 /* Function definitions ----------------------------------------------------- */
@@ -49,32 +50,14 @@ void sys_wifi_init(void)
   ESP_ERROR_CHECK(esp_wifi_init(&wifi_init_cfg));
 
   // Wifi ssid manager create
-  // g_ssid_manager = wifi_ssid_manager_create(WIFI_MAX_STATION_NUM);
-
-  sys_wifi_update_event_handler();
+  g_ssid_manager = wifi_ssid_manager_create(WIFI_MAX_STATION_NUM);
 }
 
 void sys_wifi_connect(void)
 {
+  ESP_ERROR_CHECK(esp_event_loop_init(m_sys_wifi_event_handler, NULL));
   ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
   ESP_ERROR_CHECK(esp_wifi_start());
-}
-
-void sys_wifi_update_event_handler(void)
-{
-  esp_event_handler_instance_t instance_any_id;
-  esp_event_handler_instance_t instance_got_ip;
-
-  ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
-                                                      ESP_EVENT_ANY_ID,
-                                                      &m_sys_wifi_event_handler,
-                                                      NULL,
-                                                      &instance_any_id));
-  ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT,
-                                                      IP_EVENT_STA_GOT_IP,
-                                                      &m_sys_wifi_event_handler,
-                                                      NULL,
-                                                      &instance_got_ip));
 }
 
 bool sys_wifi_is_connected(void)
@@ -90,17 +73,17 @@ void sys_wifi_set_connection_status(bool status)
 void sys_wifi_erase_config(void)
 {
   // Delete network configs
-  ESP_ERROR_CHECK(esp_wifi_get_config(ESP_IF_WIFI_STA, &m_wifi.config));
+  ESP_ERROR_CHECK(esp_wifi_get_config(WIFI_IF_STA, &m_wifi.config));
 
   memset(m_wifi.config.sta.ssid, 0, sizeof(m_wifi.config.sta.ssid));
   memset(m_wifi.config.sta.password, 0, sizeof(m_wifi.config.sta.password));
 
-  ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &m_wifi.config));
+  ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &m_wifi.config));
 }
 
 bool sys_wifi_is_configured(void)
 {
-  esp_wifi_get_config(ESP_IF_WIFI_STA, &m_wifi.config); // Get stored WiFi configs
+  esp_wifi_get_config(WIFI_IF_STA, &m_wifi.config); // Get stored WiFi configs
 
   if (strlen((char *)m_wifi.config.sta.ssid) == 0)
     return false;
@@ -124,34 +107,21 @@ static bool m_sys_wifi_connect(void)
 {
   wifi_config_t config = {0};
 
-  // wifi_ssid_manager_list_show(g_ssid_manager);
+  wifi_ssid_manager_list_show(g_ssid_manager);
 
-  // if (ESP_OK == wifi_ssid_manager_get_best_config(g_ssid_manager, &config))
-  // {
-  //   ESP_LOGW(TAG, "Selected SSID: %s (%s)", config.sta.ssid, config.sta.password);
-  //   esp_wifi_set_config(ESP_IF_WIFI_STA, &config);
-  //   esp_wifi_connect();
-  //   return true;
-  // }
-  // else
-  // {
-  //   ESP_LOGE(TAG, "Can not get the WiFi station in the WiFi save list");
-  //   esp_wifi_connect();
-  //   return false;
-  // }
-
-  wifi_config_t wifi_config = {
-      .sta = {
-          .ssid = "A6.11",
-          .password = "Khongcomatkhau",
-          .threshold.authmode = WIFI_AUTH_WPA2_PSK,
-      },
-  };
-  ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
-
-  esp_wifi_connect();
-
-  return true;
+  if (ESP_OK == wifi_ssid_manager_get_best_config(g_ssid_manager, &config))
+  {
+    ESP_LOGW(TAG, "Selected SSID: %s (%s)", config.sta.ssid, config.sta.password);
+    esp_wifi_set_config(WIFI_IF_STA, &config);
+    esp_wifi_connect();
+    return true;
+  }
+  else
+  {
+    ESP_LOGE(TAG, "Can not get the WiFi station in the WiFi save list");
+    esp_wifi_connect();
+    return false;
+  }
 }
 
 /**
@@ -163,24 +133,26 @@ static bool m_sys_wifi_connect(void)
  *
  * @return        esp_err_t
  */
-static void m_sys_wifi_event_handler(void *arg, esp_event_base_t event_base,
-                                     int32_t event_id, void *event_data)
+static esp_err_t m_sys_wifi_event_handler(void *ctx, system_event_t *event)
 {
-  switch (event_id)
+  switch (event->event_id)
   {
-  case WIFI_EVENT_STA_START:
+  case SYSTEM_EVENT_STA_START:
   {
     m_sys_wifi_connect();
     break;
   }
-  case IP_EVENT_STA_GOT_IP:
+  case SYSTEM_EVENT_STA_GOT_IP:
   {
     m_wifi.is_connected = true;
+    ESP_LOGE(TAG, "Connected!");
+
     sys_aws_init();
     break;
   }
-  case WIFI_EVENT_STA_DISCONNECTED:
+  case SYSTEM_EVENT_STA_DISCONNECTED:
   {
+    ESP_LOGE(TAG, "Disconnected!");
     m_wifi.is_connected = false;
     m_sys_wifi_connect(); // WORKAROUND: as ESP32 WiFi libs don't currently auto-reassociate
     break;
@@ -189,6 +161,8 @@ static void m_sys_wifi_event_handler(void *arg, esp_event_base_t event_base,
   default:
     break;
   }
+
+  return ESP_OK;
 }
 
 /* End of file -------------------------------------------------------- */

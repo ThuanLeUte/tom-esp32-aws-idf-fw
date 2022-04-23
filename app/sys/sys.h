@@ -21,6 +21,8 @@
 #define DEVICE_FIRMWARE_VERSION           "10000000"
 #define DEVICE_HARDWARE_VERSION           "100"
 
+#define SYS_DEVCFG_DONE_EVT               BIT1
+
 #define FSM_UPDATE_STATE(new_state)                     \
   do {                                                  \
     if (new_state < SYS_STATE_CNT) {                    \
@@ -55,6 +57,7 @@ sys_device_t;
 /* Public macros ------------------------------------------------------ */
 /* Public variables --------------------------------------------------- */
 extern sys_device_t g_device;
+extern EventGroupHandle_t g_sys_evt_group;
 
 /* Public function prototypes ----------------------------------------- */
 /**
@@ -66,6 +69,16 @@ void sys_boot(void);
  * @brief System run
  */
 void sys_run(void);
+
+/**
+ * @brief System event group set
+ */
+void sys_event_group_set(const EventBits_t bit_to_set);
+
+/**
+ * @brief System event group clear
+ */
+void sys_event_group_clear(const EventBits_t bit_to_clear);
 
 #endif // __SYS_H
 
