@@ -26,7 +26,24 @@
 typedef struct nvs_data_struct
 {
   uint32_t data_version;      // Version of NVS data
-  uint32_t dev;
+
+  struct
+  {
+    char qr_code[50];      // QR code
+    uint8_t qr_code_flag;  // Flag indicate that QR code is set or not
+  } dev;
+
+  char thing_name[50];
+  char mac_device_addr[32];
+  uint8_t provision_status;
+
+  struct
+  {
+    uint8_t status;
+    bool enable;
+    char url[100];
+  }
+  ota;
 }
 nvs_data_t;
 

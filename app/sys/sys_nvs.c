@@ -42,6 +42,9 @@ nvs_key_data_t;
 const nvs_key_data_t nvs_data_list[] =
 {
     NVS_DATA_PAIR("0001", dev)
+  , NVS_DATA_PAIR("0002", thing_name)
+  , NVS_DATA_PAIR("0003", mac_device_addr)
+  , NVS_DATA_PAIR("0004", provision_status)
 };
 
 /* Private macros ----------------------------------------------------- */
@@ -56,6 +59,8 @@ nvs_handle m_nvs_handle;
 void sys_nvs_reset_data(void)
 {
   g_nvs_setting_data.data_version = NVS_DATA_VERSION;
+
+  g_nvs_setting_data.provision_status = (uint8_t)(AWS_PROVISION_NONE);
 }
 
 void sys_nvs_init(void)

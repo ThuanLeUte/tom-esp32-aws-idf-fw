@@ -48,24 +48,10 @@ static const uint8_t aws_root_ca_pem_start[]      asm("_binary_aws_root_ca_pem_s
 static const uint8_t aws_root_ca_pem_end[]        asm("_binary_aws_root_ca_pem_end");
 
 #if (_CONFIG_ENVIRONMENT_DEV)
-static const uint8_t certificate_pem_crt_start[]  asm("_binary_dev_certificate_pem_crt_start");
-static const uint8_t certificate_pem_crt_end[]    asm("_binary_dev_certificate_pem_crt_end");
-static const uint8_t private_pem_key_start[]      asm("_binary_dev_private_pem_key_start");
-static const uint8_t private_pem_key_end[]        asm("_binary_dev_private_pem_key_end");
-#endif
-
-#if (_CONFIG_ENVIRONMENT_STAGING)
-static const uint8_t certificate_pem_crt_start[]  asm("_binary_staging_certificate_pem_crt_start");
-static const uint8_t certificate_pem_crt_end[]    asm("_binary_staging_certificate_pem_crt_end");
-static const uint8_t private_pem_key_start[]      asm("_binary_staging_private_pem_key_start");
-static const uint8_t private_pem_key_end[]        asm("_binary_staging_private_pem_key_end");
-#endif
-
-#if (_CONFIG_ENVIRONMENT_PRODUCTION)
-static const uint8_t certificate_pem_crt_start[]  asm("_binary_production_certificate_pem_crt_start");
-static const uint8_t certificate_pem_crt_end[]    asm("_binary_production_certificate_pem_crt_end");
-static const uint8_t private_pem_key_start[]      asm("_binary_production_private_pem_key_start");
-static const uint8_t private_pem_key_end[]        asm("_binary_production_private_pem_key_end");
+static const uint8_t certificate_pem_crt_start[]  asm("_binary_certificate_pem_crt_start");
+static const uint8_t certificate_pem_crt_end[]    asm("_binary_certificate_pem_crt_end");
+static const uint8_t private_pem_key_start[]      asm("_binary_private_pem_key_start");
+static const uint8_t private_pem_key_end[]        asm("_binary_private_pem_key_end");
 #endif
 
 /* Private variables -------------------------------------------------------- */

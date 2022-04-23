@@ -12,6 +12,7 @@
 
 /* Includes ----------------------------------------------------------------- */
 #include "sys_wifi.h"
+#include "sys_aws.h"
 
 /* Private enum/structs ----------------------------------------------------- */
 static struct
@@ -175,7 +176,7 @@ static void m_sys_wifi_event_handler(void *arg, esp_event_base_t event_base,
   case IP_EVENT_STA_GOT_IP:
   {
     m_wifi.is_connected = true;
-
+    sys_aws_init();
     break;
   }
   case WIFI_EVENT_STA_DISCONNECTED:
