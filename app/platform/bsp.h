@@ -62,6 +62,8 @@ void bsp_error_handler(bsp_error_t error);
 
 void bsp_delay_ms(uint32_t ms);
 
+void bsp_spiffs_init(void);
+
 /* -------------------------------------------------------------------------- */
 #ifdef __cplusplus
 } // extern "C" {

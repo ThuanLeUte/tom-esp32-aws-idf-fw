@@ -37,6 +37,7 @@ static void m_sys_evt_group_init(void);
 void sys_boot(void)
 {
   sys_nvs_init();
+  bsp_spiffs_init();
   m_sys_evt_group_init();
   sys_wifi_init();
 
@@ -54,8 +55,6 @@ void sys_boot(void)
 
 void sys_run(void)
 {
-   static EventBits_t evt_bit;
-
   switch (g_device.sys_state)
   {
   case SYS_STATE_POWER_ON:

@@ -163,8 +163,8 @@ static bool m_sys_aws_connect(void)
   connect_params.isCleanSession              = true;
   connect_params.MQTTVersion                 = MQTT_3_1_1;
 
-  connect_params.pClientID                   = "123";
-  connect_params.clientIDLen                 = 2;
+  connect_params.pClientID                   = (const char *) m_provision_params.aws_client_id;
+  connect_params.clientIDLen                 = strlen((const char *) m_provision_params.aws_client_id);
   connect_params.isWillMsgPresent            = false;
 
   // AWS mqtt init
@@ -257,11 +257,11 @@ static bool m_sys_aws_register_thing(char *token, int token_len)
 
   // Create json format
   json_printf(&out,
-              "{certificateOwnershipToken: %.*Q, parameters: {serialNumber: %Q, macAddress: %Q}}",
+              "{certificateOwnershipToken: %.*Q, parameters: {SerialNumber: %Q}}",
               token_len,
               token,
-              (const char *) m_provision_params.qr_code,
-              (const char *) m_provision_params.aws_client_id);
+              (const char *) m_provision_params.qr_code);
+
 
   m_params_publish_msg.payload    = (void *)buf;
   m_params_publish_msg.payloadLen = strlen(buf);

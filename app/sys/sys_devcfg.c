@@ -514,7 +514,8 @@ static void m_blufi_event_callback(esp_blufi_cb_event_t event, esp_blufi_cb_para
     {
       g_nvs_setting_data.dev.qr_code_flag = FLAG_QRCODE_SET;
       strncpy(g_nvs_setting_data.dev.qr_code, (const char *)param->custom_data.data, param->custom_data.data_len);
-    
+
+      SYS_NVS_STORE(dev);
       ESP_LOGI(TAG, "QR code is not set. Set Device ID: %s", g_nvs_setting_data.dev.qr_code);
     }
     else

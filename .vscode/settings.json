@@ -4,6 +4,7 @@
         "board/esp32s3-builtin.cfg"
     ],
     "files.associations": {
-        "sys_aws_provision.h": "c"
+        "sys_aws_provision.h": "c",
+        "platform_common.h": "c"
     }
 }

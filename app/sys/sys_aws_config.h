@@ -17,7 +17,7 @@
 /* Includes ----------------------------------------------------------- */
 #include "platform_common.h"
 
-#define AWS_HOST_ADDRESS                ""
+#define AWS_HOST_ADDRESS                "aflobc52fa8dv-ats.iot.us-east-1.amazonaws.com"
 
 #if (_CONFIG_ENVIRONMENT_DEV)
 #define AWS_TEMPLATE_NAME                "esp32-dev-provisioning-template"

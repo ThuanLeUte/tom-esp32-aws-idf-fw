@@ -426,9 +426,9 @@ static void m_sys_aws_provision_success_callback(const char *thing_name)
   strcpy(g_nvs_setting_data.thing_name, thing_name);
 
   // Save to NVS
-  // SYS_NVS_STORE(provision_status);
-  // SYS_NVS_STORE(dev);
-  // SYS_NVS_STORE(thing_name);
+  SYS_NVS_STORE(provision_status);
+  SYS_NVS_STORE(dev);
+  SYS_NVS_STORE(thing_name);
 
   // Start AWS
   sys_aws_start();
