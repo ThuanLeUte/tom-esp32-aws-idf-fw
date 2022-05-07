@@ -30,7 +30,34 @@ static void scan_array(const char *str, int len, void *user_data);
 /* Function definitions ----------------------------------------------- */
 bool aws_parse_shadow_packet(sys_aws_shadow_name_t name, const void *buf, uint16_t buf_len, void *p_data)
 {
- 
+  int res = 0;
+
+  switch (name)
+  {
+  case SYS_SHADOW_SCALE_TARE:
+  {
+    uint16_t *scale_tare = p_data;
+
+    ESP_LOGW(TAG, "buf: %s", (const char *)buf);
+
+    res = json_scanf((const char *)buf, (int)buf_len,
+                     "{data:{scare_tare:%d}}",
+                     scale_tare);
+
+    break;
+  }
+
+  default:
+    break;
+  }
+
+  if (0 == res)
+  {
+    ESP_LOGW(TAG, "Json parsing fail!");
+    return false;
+  }
+
+  ESP_LOGI(TAG, "Json parse success!");
   return true;
 }
 

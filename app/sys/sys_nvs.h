@@ -44,6 +44,8 @@ typedef struct nvs_data_struct
     char url[100];
   }
   ota;
+
+  uint16_t scale_tare;
 }
 nvs_data_t;
 
