@@ -18,6 +18,7 @@
 #include "sys_devcfg.h"
 #include "bsp.h"
 #include "sys_aws.h"
+#include "sys_ota.h"
 
 /* Private defines ---------------------------------------------------- */
 static const char *TAG = "sys";
@@ -44,12 +45,17 @@ void sys_boot(void)
   if (sys_wifi_is_configured())
   {
     sys_wifi_connect();
-    FSM_UPDATE_STATE(SYS_STATE_READY);
+
+    // Check OTA enable or not
+    if (g_nvs_setting_data.ota.enable)
+      sys_ota_start();
+    else
+      FSM_UPDATE_STATE(SYS_STATE_READY);
   }
   else
   {
-    sys_devcfg_init();
-    FSM_UPDATE_STATE(SYS_STATE_NW_SETUP);
+    // sys_devcfg_init();
+    // FSM_UPDATE_STATE(SYS_STATE_NW_SETUP);
   }
 }
 

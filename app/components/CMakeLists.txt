@@ -9,6 +9,7 @@ set(COMPONENT_SRCS "./blufi_security/blufi_security.c"
                    "./lib_adf/esp_dispatcher.c"
                    "./lib_adf/nvs_action.c"
                    "./lib_adf/wifi_ssid_manager.c"
+                   "./bsp/bsp_timer.c"
                    )
 
 set(COMPONENT_ADD_INCLUDEDIRS .
@@ -19,6 +20,7 @@ set(COMPONENT_ADD_INCLUDEDIRS .
                               "./aws_iot/include"
                               "./protocol"
                               "./lib_adf"
+                              "./bsp"
                               "../platform"
                               "../sys"
                               )

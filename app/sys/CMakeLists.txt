@@ -7,6 +7,7 @@ set(COMPONENT_SRCS "sys.c"
                    "sys_aws_mqtt.c"
                    "sys_aws.c"
                    "sys_devcfg.c"
+                   "sys_ota.c"
                    )
 
 set(COMPONENT_ADD_INCLUDEDIRS .
@@ -18,6 +19,7 @@ set(COMPONENT_ADD_INCLUDEDIRS .
                               "../components/one_button"
                               "../components/protocol"
                               "../components/lib_adf"
+                              "../components/bsp"
                               "../build"
                               )
 
@@ -27,7 +29,7 @@ set(COMPONENT_EMBED_TXTFILES certs/aws-root-ca.pem
                              )
  
 
-set(COMPONENT_REQUIRES nvs_flash jsmn spiffs bt)
+set(COMPONENT_REQUIRES nvs_flash jsmn spiffs bt esp_http_client esp_https_ota esp-tls app_update)
 
 register_component()
 

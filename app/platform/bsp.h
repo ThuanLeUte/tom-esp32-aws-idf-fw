@@ -64,6 +64,8 @@ void bsp_delay_ms(uint32_t ms);
 
 void bsp_spiffs_init(void);
 
+uint32_t bsp_get_sys_tick_ms(void);
+
 /* -------------------------------------------------------------------------- */
 #ifdef __cplusplus
 } // extern "C" {

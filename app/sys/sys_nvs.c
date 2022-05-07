@@ -4,7 +4,7 @@
  * @license    This project is released under the Hydratech License.
  * @version    1.0.0
  * @date       2022-02-15
- * @author     Nhi Ngo
+ * @author     Thuan Le
  * @brief      NVS flash memory handle
  * @note       None
  * @example    None
@@ -45,6 +45,7 @@ const nvs_key_data_t nvs_data_list[] =
   , NVS_DATA_PAIR("0002", thing_name)
   , NVS_DATA_PAIR("0003", mac_device_addr)
   , NVS_DATA_PAIR("0004", provision_status)
+  , NVS_DATA_PAIR("0005", ota)
 };
 
 /* Private macros ----------------------------------------------------- */
