@@ -54,8 +54,8 @@ void sys_boot(void)
   }
   else
   {
-    // sys_devcfg_init();
-    // FSM_UPDATE_STATE(SYS_STATE_NW_SETUP);
+    sys_devcfg_init();
+    FSM_UPDATE_STATE(SYS_STATE_NW_SETUP);
   }
 }
 

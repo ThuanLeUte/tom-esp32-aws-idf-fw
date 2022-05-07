@@ -60,6 +60,9 @@ void sys_ota_start(void)
   uint8_t ota_count = 0;
   tmr_t wifi_connect_tmr;
 
+  // Wait wifi stable
+  bsp_delay_ms(5000);
+
   // Wait for wifi is connected {
   bsp_tmr_start(&wifi_connect_tmr, WIFI_CONNECT_TIMEOUT_MS);
   while (!sys_wifi_is_connected())
