@@ -73,9 +73,7 @@ aws_req_type_t;
 typedef enum
 {
    AWS_NOTI_ALARM
-  ,AWS_NOTI_MEASURE_REPORT
-  ,AWS_NOTI_MEASURE_REPORT_PRESS_YES_TIMEOUT
-  ,AWS_NOTI_MEASURE_REPORT_NO_QUES
+  ,AWS_NOTI_DEVICE_DATA
  
   ,AWS_NOTI_UNKNOWN
 }
@@ -124,24 +122,27 @@ typedef struct
 aws_resp_param_info_t;
 
 /**
+ * @brief AWS notification device data struct
+ */
+typedef struct
+{
+  char serial_number[50];
+  uint16_t weight_scale[50];
+  uint16_t weight_scale_cnt;
+  uint16_t longitude;
+  uint16_t lattitude;
+}
+aws_noti_dev_data_t;
+
+/**
  * @brief AWS notification param info
  */
 typedef struct
 {
-  char patient_id[100];
   uint32_t time;
+  uint32_t alarm_code;
 
-  struct
-  {
-    float temp;
-    uint8_t spo2;
-    uint8_t hr;
-
-    uint32_t question_id[100];
-    sys_ques_status_t question_status[100];
-    uint16_t question_cnt;
-  }
-  measure_report;
+  aws_noti_dev_data_t device_data;
 }
 aws_noti_param_info_t;
 

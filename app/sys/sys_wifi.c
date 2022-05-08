@@ -147,7 +147,8 @@ static esp_err_t m_sys_wifi_event_handler(void *ctx, system_event_t *event)
     m_wifi.is_connected = true;
     ESP_LOGE(TAG, "Connected!");
 
-    sys_aws_init();
+    if (!g_nvs_setting_data.ota.enable)
+      sys_aws_init();
     break;
   }
   case SYSTEM_EVENT_STA_DISCONNECTED:

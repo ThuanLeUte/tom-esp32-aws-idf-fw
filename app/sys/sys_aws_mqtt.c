@@ -28,12 +28,12 @@
 
 static const char *AWS_SUBSCRIBE_TOPIC[] =
 {
-  "covid19/"AWS_WORKING_ENVIRONMENT"/%s/down",
+  "lox/%s/down",
 };
 
 static const char *AWS_PUBLISH_TOPIC[] =
 {
-  "covid19/"AWS_WORKING_ENVIRONMENT"/%s/up",
+  "lox/%s/up",
 };
 
 /* Private Constants -------------------------------------------------------- */
@@ -52,16 +52,27 @@ static void m_sys_aws_subscribe_callback_handler(AWS_IoT_Client             *p_c
                                                  void                       *p_data);
 
 /* Function definitions ----------------------------------------------------- */
-// void sys_aws_mqtt_send_noti(aws_noti_type_t noti_type, void *param1, void *param2)
-// {
-//   g_sys_aws.service.mqtt.data.packet_type                = AWS_PKT_NOTI;
-//   g_sys_aws.service.mqtt.data.noti_param.noti_type       = noti_type;
-//   g_sys_aws.service.mqtt.data.noti_param.noti_id         = 1;
-//   g_sys_aws.service.mqtt.data.noti_param.info.time       = bsp_rtc_get_time();
-//   strcpy(g_sys_aws.service.mqtt.data.noti_param.info.patient_id, g_nvs_setting_data.patient_id);
+void sys_aws_mqtt_send_noti(aws_noti_type_t noti_type, void *param)
+{
+  g_sys_aws.service.mqtt.data.packet_type                = AWS_PKT_NOTI;
+  g_sys_aws.service.mqtt.data.noti_param.noti_type       = noti_type;
+  g_sys_aws.service.mqtt.data.noti_param.noti_id         = 1;
+  g_sys_aws.service.mqtt.data.noti_param.info.time       = 1;//bsp_rtc_get_time();
 
-//   sys_aws_mqtt_trigger_publish(AWS_PUB_TOPIC_UPSTREAM);
-// }
+  if (noti_type == AWS_NOTI_ALARM)
+  {
+    uint32_t *alarm_code = (uint32_t *)param;
+    g_sys_aws.service.mqtt.data.noti_param.info.alarm_code = *alarm_code;
+  }
+  else if (noti_type == AWS_NOTI_DEVICE_DATA)
+  {
+    memcpy(&g_sys_aws.service.mqtt.data.noti_param.info.device_data,
+           (aws_noti_dev_data_t *)param,
+           sizeof(aws_noti_dev_data_t));
+  }
+
+  sys_aws_mqtt_trigger_publish(AWS_PUB_TOPIC_UPSTREAM);
+}
 
 void sys_aws_mqtt_trigger_publish(sys_aws_mqtt_pub_topic_t topic)
 {
@@ -153,31 +164,6 @@ static void m_sys_aws_subscribe_callback_handler(AWS_IoT_Client *p_client,
              (int)params->payloadLen,
              m_json_token_struct,
              sizeof(m_json_token_struct) / sizeof(m_json_token_struct[0]));
-
-  // Check "type"
-  json_obs = findToken("type", params->payload, m_json_token_struct);
-  if (json_obs)
-  {
-    memcpy(buf, params->payload + json_obs->start, json_obs->end - json_obs->start);
-    ESP_LOGI(TAG, "type: %s", buf);
-
-    if (0 == strcmp("req", buf))
-    {
-      json_obs = findToken("get_dev_info", params->payload, m_json_token_struct);
-      if (json_obs)
-      {
-        // sys_aws_mqtt_send_response(AWS_REQ_GET_DEVICE_INFO);
-      }
-    }
-    else if (0 == strcmp("ack", buf))
-    {
-      json_obs = findToken("nt", params->payload, m_json_token_struct);
-      if (json_obs)
-      {
-        // TODO: Allow new data can send out
-      }
-    }
-  }
 }
 
 /* End of file -------------------------------------------------------------- */

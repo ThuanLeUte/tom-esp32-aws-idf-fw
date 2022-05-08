@@ -35,6 +35,11 @@ void bsp_delay_ms(uint32_t ms)
   vTaskDelay(pdMS_TO_TICKS(ms));
 }
 
+uint32_t bsp_get_sys_tick_ms(void)
+{
+  return xTaskGetTickCount(); // Get System Tick ( 1 tick = 1 ms)      
+}
+
 void bsp_spiffs_init(void)
 {
   esp_err_t ret = ESP_OK;

@@ -16,6 +16,7 @@
 #include "sys_aws_job.h"
 #include "sys_aws_provision.h"
 #include "sys_devcfg.h"
+#include "sys_ota.h"
 
 #include "platform_common.h"
 #include "aws_iot_config.h"
@@ -364,35 +365,35 @@ static void m_sys_aws_jobs_next_job_callback(AWS_IoT_Client *p_client,
             tok = findToken("url", params->payload, tok_document);
             if (tok)
             {
-              // // Get OTA state in nvs
-              // switch (g_nvs_setting_data.ota.status)
-              // {
-              // case OTA_STATE_FAILED:
-              //   ESP_LOGW(TAG, "JOB_EXECUTION_FAILED");
-              //   sys_aws_jobs_send_update(job_id, JOB_EXECUTION_FAILED);
-              //   break;
+              // Get OTA state in nvs
+              switch (g_nvs_setting_data.ota.status)
+              {
+              case OTA_STATE_FAILED:
+                ESP_LOGW(TAG, "JOB_EXECUTION_FAILED");
+                sys_aws_jobs_send_update(job_id, JOB_EXECUTION_FAILED);
+                break;
               
-              // case OTA_STATE_SUCCEEDED:
-              //   ESP_LOGW(TAG, "JOB_EXECUTION_SUCCEEDED");
-              //   sys_aws_jobs_send_update(job_id, JOB_EXECUTION_SUCCEEDED);
-              //   break;
+              case OTA_STATE_SUCCEEDED:
+                ESP_LOGW(TAG, "JOB_EXECUTION_SUCCEEDED");
+                sys_aws_jobs_send_update(job_id, JOB_EXECUTION_SUCCEEDED);
+                break;
 
-              // case OTA_STATE_NONE:
-              //   sys_aws_jobs_send_update(job_id, JOB_EXECUTION_IN_PROGRESS);
-              //   parseStringValue(g_nvs_setting_data.ota.url, MAX_SIZE_OF_JOB_UPGRADE_URL, params->payload, tok);
+              case OTA_STATE_NONE:
+                sys_aws_jobs_send_update(job_id, JOB_EXECUTION_IN_PROGRESS);
+                parseStringValue(g_nvs_setting_data.ota.url, MAX_SIZE_OF_JOB_UPGRADE_URL, params->payload, tok);
                 
-              //   ESP_LOGW(TAG, "JOB_EXECUTION_IN_PROGRESS");
-              //   ESP_LOGI(TAG, "OTA url: %s", g_nvs_setting_data.ota.url);
+                ESP_LOGW(TAG, "JOB_EXECUTION_IN_PROGRESS");
+                ESP_LOGI(TAG, "OTA url: %s", g_nvs_setting_data.ota.url);
 
-              //   sys_ota_setup(g_nvs_setting_data.ota.url);
-              //   break;
+                sys_ota_setup(g_nvs_setting_data.ota.url);
+                break;
               
-              // default:
-              //   break;
-              // }
+              default:
+                break;
+              }
 
-              // g_nvs_setting_data.ota.status = OTA_STATE_NONE;
-              // SYS_NVS_STORE(ota);
+              g_nvs_setting_data.ota.status = OTA_STATE_NONE;
+              SYS_NVS_STORE(ota);
             }
           }
         }

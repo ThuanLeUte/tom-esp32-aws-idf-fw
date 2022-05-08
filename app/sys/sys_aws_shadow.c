@@ -48,9 +48,7 @@ static const sys_shadow_t SHADOW_TABLE[] =
   //          | Shadow                           | Name                |
   //          +----------------------------------+---------------------+
      SHADOW_INFO(SYS_SHADOW_FIRMWARE_ID          , "firmware_id"       )
-    ,SHADOW_INFO(SYS_SHADOW_SCHEDULE_CONFIG      , "schedule_config"   )
-    ,SHADOW_INFO(SYS_SHADOW_SCHEDULE_TIMELINE    , "schedule_timeline" )
-    ,SHADOW_INFO(SYS_SHADOW_BASELINE             , "baseline"          )
+    ,SHADOW_INFO(SYS_SHADOW_SCALE_TARE           , "scale_tare"        )
   //          +==================================+=====================+
 };
 
@@ -67,7 +65,7 @@ static void m_shadow_create_json_format(char *json_buffer, sys_aws_shadow_name_t
 
 static void m_parse_shadow_get_payload(sys_aws_shadow_name_t name, const char *buf, uint16_t buf_len);
 
-static void m_shadow_schedule_config_callback(const char *p_json_string, uint32_t json_data_len, jsonStruct_t *p_context);
+static void m_shadow_scale_tare_callback(const char *p_json_string, uint32_t json_data_len, jsonStruct_t *p_context);
 static void m_shadow_schedule_timeline_callback(const char *p_json_string, uint32_t json_data_len, jsonStruct_t *p_context);
 static void m_shadow_baseline_callback(const char *p_json_string, uint32_t json_data_len, jsonStruct_t *p_context);
 
@@ -91,20 +89,18 @@ bool sys_aws_shadow_init(void)
   m_shadow_json_init();
 
   // AWS register delta
-  CHECK(SUCCESS == aws_iot_shadow_register_delta(&g_sys_aws.client, SHADOW_TABLE[SYS_SHADOW_SCHEDULE_CONFIG].name, &m_json_struct[SYS_SHADOW_SCHEDULE_CONFIG]), false);
-  CHECK(SUCCESS == aws_iot_shadow_register_delta(&g_sys_aws.client, SHADOW_TABLE[SYS_SHADOW_SCHEDULE_TIMELINE].name, &m_json_struct[SYS_SHADOW_SCHEDULE_TIMELINE]), false);
-  CHECK(SUCCESS == aws_iot_shadow_register_delta(&g_sys_aws.client, SHADOW_TABLE[SYS_SHADOW_BASELINE].name, &m_json_struct[SYS_SHADOW_BASELINE]), false);
+  CHECK(SUCCESS == aws_iot_shadow_register_delta(&g_sys_aws.client, SHADOW_TABLE[SYS_SHADOW_SCALE_TARE].name, &m_json_struct[SYS_SHADOW_SCALE_TARE]), false);
 
   // NOTE: Device will gets status of shadow on AWS first then 
   //       will update new status on AWS even device call shadow update
   //       The value on the AWS is the final value for device
 
   // Get data from AWS
-  sys_aws_shadow_trigger_command(SYS_AWS_SHADOW_CMD_GET, SYS_SHADOW_SCHEDULE_CONFIG);     // Get data first time
-  sys_aws_shadow_trigger_command(SYS_AWS_SHADOW_CMD_GET, SYS_SHADOW_SCHEDULE_TIMELINE);   // Get data first time
-  sys_aws_shadow_trigger_command(SYS_AWS_SHADOW_CMD_GET, SYS_SHADOW_BASELINE);            // Get data first time
+  sys_aws_shadow_trigger_command(SYS_AWS_SHADOW_CMD_GET, SYS_SHADOW_SCALE_TARE);     // Get data first time
 
-  sys_aws_shadow_trigger_command(SYS_AWS_SHADOW_CMD_SET, SYS_SHADOW_FIRMWARE_ID);            // Get data first time
+  // Send Firmware ID
+  sys_aws_shadow_trigger_command(SYS_AWS_SHADOW_CMD_SET, SYS_SHADOW_FIRMWARE_ID);
+  sys_aws_shadow_trigger_command(SYS_AWS_SHADOW_CMD_SET, SYS_SHADOW_SCALE_TARE);
 
   return true;
 }
@@ -194,6 +190,12 @@ static void m_shadow_create_json_format(char *json_buffer, sys_aws_shadow_name_t
     break;
   }
 
+  case SYS_SHADOW_SCALE_TARE:
+  {
+    json_printf(&out, "{data:{scare_tare: %d}}",  g_nvs_setting_data.scale_tare);
+    break;
+  }
+
   default:
     break;
   }
@@ -212,14 +214,8 @@ static void m_shadow_create_json_format(char *json_buffer, sys_aws_shadow_name_t
  */
 static void m_shadow_json_init(void)
 {
-  m_json_struct[SYS_SHADOW_SCHEDULE_CONFIG].cb   = m_shadow_schedule_config_callback;
-  m_json_struct[SYS_SHADOW_SCHEDULE_CONFIG].pKey = SHADOW_TABLE[SYS_SHADOW_SCHEDULE_CONFIG].name;
-
-  m_json_struct[SYS_SHADOW_SCHEDULE_TIMELINE].cb   = m_shadow_schedule_timeline_callback;
-  m_json_struct[SYS_SHADOW_SCHEDULE_TIMELINE].pKey = SHADOW_TABLE[SYS_SHADOW_SCHEDULE_TIMELINE].name;
-
-  m_json_struct[SYS_SHADOW_BASELINE].cb   = m_shadow_baseline_callback;
-  m_json_struct[SYS_SHADOW_BASELINE].pKey = SHADOW_TABLE[SYS_SHADOW_BASELINE].name;
+  m_json_struct[SYS_SHADOW_SCALE_TARE].cb   = m_shadow_scale_tare_callback;
+  m_json_struct[SYS_SHADOW_SCALE_TARE].pKey = SHADOW_TABLE[SYS_SHADOW_SCALE_TARE].name;
 }
 
 /**
@@ -234,21 +230,13 @@ static void m_shadow_json_init(void)
 */
 static void m_parse_shadow_get_payload(sys_aws_shadow_name_t name, const char *buf, uint16_t buf_len)
 {
+  // NOTE: Remove "{desired:" in the data buffer
   uint16_t offset = sizeof("{desired:") + 1;
 
-  //NOTE: Remove "{desired:" in the data buffer
   switch (name)
   {
-  case SYS_SHADOW_SCHEDULE_CONFIG:
-    m_shadow_schedule_config_callback((const char *)&buf[offset], buf_len, NULL);
-    break;
-
-  case SYS_SHADOW_SCHEDULE_TIMELINE:
-    m_shadow_schedule_timeline_callback((const char *)&buf[offset], buf_len, NULL);
-    break;
-
-    case SYS_SHADOW_BASELINE:
-    m_shadow_baseline_callback((const char *)&buf[offset], buf_len, NULL);
+  case SYS_SHADOW_SCALE_TARE:
+    m_shadow_scale_tare_callback((const char *)&buf[offset], buf_len, NULL);
     break;
 
   default:
@@ -310,7 +298,7 @@ static void m_shadow_get_callback(const char          *p_thing_name,
 }
 
 /**
- * @brief         AWS schedule config callback
+ * @brief         AWS shadow callback
  *
  * @param[in]     p_json_string     Pointer to json string
  * @param[in]     json_data_len     Json data length
@@ -321,41 +309,22 @@ static void m_shadow_get_callback(const char          *p_thing_name,
  *
  * @return        None
 */
-static void m_shadow_schedule_config_callback(const char *p_json_string, uint32_t json_data_len, jsonStruct_t *p_context)
+static void m_shadow_scale_tare_callback(const char *p_json_string, uint32_t json_data_len, jsonStruct_t *p_context)
 {
-}
+  uint16_t scale_tare;
 
-/**
- * @brief         AWS schedule timeline callback
- *
- * @param[in]     p_json_string     Pointer to json string
- * @param[in]     json_data_len     Json data length
- * @param[in]     p_received_json   Pointer to received json
- * @param[in]     p_context         Pointer to context data
- *
- * @attention     None
- *
- * @return        None
-*/
-static void m_shadow_schedule_timeline_callback(const char *p_json_string, uint32_t json_data_len, jsonStruct_t *p_context)
-{
-  aws_parse_shadow_packet(SYS_SHADOW_SCHEDULE_TIMELINE, p_json_string, json_data_len, NULL);
-}
+  if (aws_parse_shadow_packet(SYS_SHADOW_SCALE_TARE, p_json_string, json_data_len, &scale_tare))
+  {
+    g_nvs_setting_data.scale_tare = scale_tare;
+    ESP_LOGW(TAG, "Scare tare: %d", g_nvs_setting_data.scale_tare);
+    SYS_NVS_STORE(scale_tare);
 
-/**
- * @brief         AWS baseline callback
- *
- * @param[in]     p_json_string     Pointer to json string
- * @param[in]     json_data_len     Json data length
- * @param[in]     p_received_json   Pointer to received json
- * @param[in]     p_context         Pointer to context data
- *
- * @attention     None
- *
- * @return        None
-*/
-static void m_shadow_baseline_callback(const char *p_json_string, uint32_t json_data_len, jsonStruct_t *p_context)
-{
+    sys_aws_shadow_trigger_command(SYS_AWS_SHADOW_CMD_SET, SYS_SHADOW_SCALE_TARE);
+  }
+  else
+  {
+    ESP_LOGW(TAG, "Parsing baseline faild");
+  }
 }
 
 /**

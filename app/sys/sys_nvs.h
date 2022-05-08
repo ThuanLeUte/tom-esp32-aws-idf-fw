@@ -4,7 +4,7 @@
  * @license    This project is released under the Hydratech License.
  * @version    1.0.0
  * @date       2022-02-15
- * @author     Nhi Ngo
+ * @author     Thuan Le
  * @brief      NVS flash memory handle
  * @note       None
  * @example    None
@@ -44,6 +44,8 @@ typedef struct nvs_data_struct
     char url[100];
   }
   ota;
+
+  uint16_t scale_tare;
 }
 nvs_data_t;
 

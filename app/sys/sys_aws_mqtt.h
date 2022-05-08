@@ -16,6 +16,7 @@
 
 /* Includes ----------------------------------------------------------- */
 #include "platform_common.h"
+#include "aws_builder.h"
 
 /* Public defines ----------------------------------------------------- */
 /* Public enumerate/structure ----------------------------------------- */
@@ -83,7 +84,10 @@ bool sys_aws_mqtt_subscribe(sys_aws_mqtt_sub_topic_t topic);
  */
 bool sys_aws_mqtt_publish(sys_aws_mqtt_pub_topic_t topic, char *buf);
 
-// void sys_aws_mqtt_send_noti(aws_noti_type_t noti_type, void *param1, void *param2);
+/**
+ * @brief         AWS MQTT send noti
+ */
+void sys_aws_mqtt_send_noti(aws_noti_type_t noti_type, void *param);
 
 #endif /* __SYS_AWS_MQTT_H */
 

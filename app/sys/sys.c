@@ -18,6 +18,7 @@
 #include "sys_devcfg.h"
 #include "bsp.h"
 #include "sys_aws.h"
+#include "sys_ota.h"
 
 /* Private defines ---------------------------------------------------- */
 static const char *TAG = "sys";
@@ -44,7 +45,12 @@ void sys_boot(void)
   if (sys_wifi_is_configured())
   {
     sys_wifi_connect();
-    FSM_UPDATE_STATE(SYS_STATE_READY);
+
+    // Check OTA enable or not
+    if (g_nvs_setting_data.ota.enable)
+      sys_ota_start();
+    else
+      FSM_UPDATE_STATE(SYS_STATE_READY);
   }
   else
   {
@@ -71,7 +77,23 @@ void sys_run(void)
   
   case SYS_STATE_READY:
   {
-    bsp_delay_ms(1000);
+    bsp_delay_ms(50000);
+
+    uint32_t alarm_code = 1111;
+    sys_aws_mqtt_send_noti(AWS_NOTI_ALARM, &alarm_code);
+    bsp_delay_ms(5000);
+
+    aws_noti_dev_data_t device_data;
+    sprintf(device_data.serial_number, "1234567");
+    
+    device_data.weight_scale[0]  = 1;
+    device_data.weight_scale[1]  = 90;
+    device_data.weight_scale[2]  = 600;
+    device_data.weight_scale_cnt = 3;
+
+    device_data.longitude        = 110;
+    device_data.lattitude        = 70;
+    sys_aws_mqtt_send_noti(AWS_NOTI_DEVICE_DATA, &device_data);
 
     break;
   }
