@@ -77,7 +77,23 @@ void sys_run(void)
   
   case SYS_STATE_READY:
   {
-    bsp_delay_ms(1000);
+    bsp_delay_ms(50000);
+
+    uint32_t alarm_code = 1111;
+    sys_aws_mqtt_send_noti(AWS_NOTI_ALARM, &alarm_code);
+    bsp_delay_ms(5000);
+
+    aws_noti_dev_data_t device_data;
+    sprintf(device_data.serial_number, "1234567");
+    
+    device_data.weight_scale[0]  = 1;
+    device_data.weight_scale[1]  = 90;
+    device_data.weight_scale[2]  = 600;
+    device_data.weight_scale_cnt = 3;
+
+    device_data.longitude        = 110;
+    device_data.lattitude        = 70;
+    sys_aws_mqtt_send_noti(AWS_NOTI_DEVICE_DATA, &device_data);
 
     break;
   }
