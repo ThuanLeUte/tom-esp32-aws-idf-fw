@@ -127,10 +127,12 @@ aws_resp_param_info_t;
 typedef struct
 {
   char serial_number[50];
-  uint16_t weight_scale[50];
-  uint16_t weight_scale_cnt;
-  uint16_t longitude;
-  uint16_t lattitude;
+  uint16_t battery;
+  uint16_t weight_scale;
+  uint32_t alarm_code;
+  uint16_t temp;
+  float longitude;
+  float lattitude;
 }
 aws_noti_dev_data_t;
 

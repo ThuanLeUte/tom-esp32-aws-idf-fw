@@ -102,18 +102,22 @@ void aws_build_notification(aws_noti_param_t *param, void *buf, uint32_t size)
     ESP_LOGI(TAG, "Noti name       : %s", AWS_NOTI_LIST[param->noti_type].name);
     ESP_LOGI(TAG, "Time            : %d", param->info.time);
     ESP_LOGI(TAG, "Serial number   : %s", DEV_DATA.serial_number);
-    ESP_LOGI(TAG, "Weight scale cnt: %d", DEV_DATA.weight_scale_cnt);
-    ESP_LOGI(TAG, "Weight scale cnt: %d", DEV_DATA.weight_scale[0]);
-    ESP_LOGI(TAG, "Weight scale cnt: %d", DEV_DATA.weight_scale[1]);
-    ESP_LOGI(TAG, "Weight scale cnt: %d", DEV_DATA.weight_scale[2]);
-    ESP_LOGI(TAG, "Longitude       : %d", DEV_DATA.longitude);
-    ESP_LOGI(TAG, "Lattitude       : %d", DEV_DATA.lattitude);
+    ESP_LOGI(TAG, "Battery         : %d", DEV_DATA.battery);
+    ESP_LOGI(TAG, "Weight scale    : %d", DEV_DATA.weight_scale);
+    ESP_LOGI(TAG, "Alarm code      : %d", DEV_DATA.alarm_code);
+    ESP_LOGI(TAG, "Temperature     : %d", DEV_DATA.temp);
+    ESP_LOGI(TAG, "Longitude       : %f", DEV_DATA.longitude);
+    ESP_LOGI(TAG, "Lattitude       : %f", DEV_DATA.lattitude);
 
-    json_printf(&out, "{nt: %Q, time: %d, serial_number: %Q, weight_scale: %M, longitude: %d, lattitude: %d}}",
+    json_printf(&out, "{nt: %Q, time: %d, serial_number: %Q, battery: %d, weight_scale: %d,
+                        alarm_code: %d, temp: %d, longitude: %f, lattitude: %f}}",
                 AWS_NOTI_LIST[param->noti_type].name,
                 param->info.time,
                 DEV_DATA.serial_number,
-                json_printf_array, DEV_DATA.weight_scale, DEV_DATA.weight_scale_cnt * sizeof(DEV_DATA.weight_scale[0]), sizeof(DEV_DATA.weight_scale[0]), "%hu",
+                DEV_DATA.battery,
+                DEV_DATA.weight_scale,
+                DEV_DATA.alarm_code,
+                DEV_DATA.temp,
                 DEV_DATA.longitude,
                 DEV_DATA.lattitude);
 

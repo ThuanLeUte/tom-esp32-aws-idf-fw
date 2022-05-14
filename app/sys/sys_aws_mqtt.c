@@ -57,7 +57,7 @@ void sys_aws_mqtt_send_noti(aws_noti_type_t noti_type, void *param)
   g_sys_aws.service.mqtt.data.packet_type                = AWS_PKT_NOTI;
   g_sys_aws.service.mqtt.data.noti_param.noti_type       = noti_type;
   g_sys_aws.service.mqtt.data.noti_param.noti_id         = 1;
-  g_sys_aws.service.mqtt.data.noti_param.info.time       = 1;//bsp_rtc_get_time();
+  g_sys_aws.service.mqtt.data.noti_param.info.time       = 1652490630;//bsp_rtc_get_time();
 
   if (noti_type == AWS_NOTI_ALARM)
   {
