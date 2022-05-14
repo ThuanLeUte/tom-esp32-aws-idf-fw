@@ -6,6 +6,7 @@
     "files.associations": {
         "sys_aws_provision.h": "c",
         "platform_common.h": "c",
-        "sys_aws_config.h": "c"
+        "sys_aws_config.h": "c",
+        "sys_ota.h": "c"
     }
 }
