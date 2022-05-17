@@ -136,7 +136,7 @@ void sys_aws_start(void)
  */
 static void m_sys_aws_task(void *params)
 {
-  char temp_buf[AWS_IOT_MQTT_TX_BUF_LEN];
+    char temp_buf[AWS_IOT_MQTT_TX_BUF_LEN] = { 0 };
   sys_aws_service_t service;
 
   m_sys_aws_connect();

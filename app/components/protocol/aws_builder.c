@@ -109,7 +109,7 @@ void aws_build_notification(aws_noti_param_t *param, void *buf, uint32_t size)
     ESP_LOGI(TAG, "Longitude       : %f", DEV_DATA.longitude);
     ESP_LOGI(TAG, "Lattitude       : %f", DEV_DATA.lattitude);
 
-    json_printf(&out, "{nt: %Q, time: %d, serial_number: %Q, battery: %d, weight_scale: %d,\
+    json_printf(&out, "{nt: %Q, time: %%llu, serial_number: %Q, battery: %d, weight_scale: %d,\
                         alarm_code: %d, temp: %d, longitude: %f, lattitude: %f}}",
                 AWS_NOTI_LIST[param->noti_type].name,
                 param->info.time,
