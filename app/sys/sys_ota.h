@@ -16,6 +16,7 @@
 
 /* Includes ----------------------------------------------------------- */
 #include "platform_common.h"
+#include "esp_ota_ops.h"
 
 /* Public defines ----------------------------------------------------- */
 #define OTA_STATE_NONE          (0)

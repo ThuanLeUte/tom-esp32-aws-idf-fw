@@ -33,6 +33,8 @@ EventGroupHandle_t g_sys_evt_group;
 /* Private Constants -------------------------------------------------- */
 /* Private function prototypes ---------------------------------------- */
 static void m_sys_evt_group_init(void);
+static bool m_sys_self_test(void);
+static void m_sys_firmware_rollback_check(void);
 
 /* Function definitions ----------------------------------------------- */
 void sys_boot(void)
@@ -123,4 +125,52 @@ static void m_sys_evt_group_init(void)
 {
   g_sys_evt_group = xEventGroupCreate();
 }
+
+/**
+ * @brief         Firmware rollback check
+ * 
+ * @param[in]     None
+ * 
+ * @attention     None
+ * 
+ * @return        None
+ */
+static void m_sys_firmware_rollback_check(void)
+{
+  esp_ota_img_states_t ota_state;
+  const esp_partition_t *running = esp_ota_get_running_partition();
+
+  if (esp_ota_get_state_partition(running, &ota_state) == ESP_OK)
+  {
+    if (ota_state == ESP_OTA_IMG_PENDING_VERIFY)
+    {
+      if (m_sys_self_test())
+      {
+        ESP_LOGI(TAG, "Self-test completed successfully! Continuing execution ...");
+        esp_ota_mark_app_valid_cancel_rollback();
+      }
+      else
+      {
+        ESP_LOGE(TAG, "Self-test failed! Start rollback to the previous version ...");
+        esp_ota_mark_app_invalid_rollback_and_reboot();
+      }
+    }
+  }
+}
+
+/**
+ * @brief         Firmware rollback check
+ * 
+ * @param[in]     None
+ * 
+ * @attention     None
+ * 
+ * @return        true: Self-test successful
+ *                false: Self-test failed
+ */
+static bool m_sys_self_test(void)
+{
+  return true;
+}
+
 /* End of file -------------------------------------------------------- */

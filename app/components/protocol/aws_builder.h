@@ -141,7 +141,7 @@ aws_noti_dev_data_t;
  */
 typedef struct
 {
-  uint32_t time;
+  uint64_t time;
   uint32_t alarm_code;
 
   aws_noti_dev_data_t device_data;

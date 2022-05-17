@@ -19,7 +19,6 @@
 
 #include "esp_system.h"
 #include "esp_event_loop.h"
-#include "esp_ota_ops.h"
 #include "esp_http_client.h"
 #include "esp_https_ota.h"
 #include "sys_aws_config.h"

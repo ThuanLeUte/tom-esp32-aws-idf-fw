@@ -8,6 +8,7 @@ set(COMPONENT_SRCS "sys.c"
                    "sys_aws.c"
                    "sys_devcfg.c"
                    "sys_ota.c"
+                   "sys_time.c"
                    )
 
 set(COMPONENT_ADD_INCLUDEDIRS .

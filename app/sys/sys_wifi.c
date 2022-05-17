@@ -14,6 +14,7 @@
 #include "sys_wifi.h"
 #include "sys_aws.h"
 #include "sys_devcfg.h"
+#include "sys_time.h"
 
 /* Private enum/structs ----------------------------------------------------- */
 static struct
@@ -146,6 +147,7 @@ static esp_err_t m_sys_wifi_event_handler(void *ctx, system_event_t *event)
   {
     m_wifi.is_connected = true;
     ESP_LOGE(TAG, "Connected!");
+    sys_time_init();
 
     if (!g_nvs_setting_data.ota.enable)
       sys_aws_init();
