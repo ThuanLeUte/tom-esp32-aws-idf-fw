@@ -19,11 +19,11 @@
 #include "bsp.h"
 
 /* Private defines ---------------------------------------------------- */
-#define ONE_MSECOND   1
-#define ONE_SECOND  1000* ONE_MSECOND
-#define ONE_MINUTE  60 * ONE_SECOND
-#define ONO_HOUR    60 * ONE_MINUTE
-#define SYS_TIME_NTP_SYNC_INTEVAL_MS   (ONO_HOUR) // Miliseconds 
+#define ONE_MS_SECOND         (1)
+#define ONE_SECOND            (1000 * ONE_MS_SECOND)
+#define ONE_MINUTE            (60 * ONE_SECOND)
+#define ONE_HOUR              (60 * ONE_MINUTE)
+#define NTP_SYNC_INTEVAL_MS   (ONE_HOUR)
 
 /* Private enumerate/structure ---------------------------------------- */
 /*
@@ -67,7 +67,7 @@ static void m_sys_time_sync_time_ntp(void);
 void sys_time_init(void)
 {
   bsp_tmr_auto_init(&m_ntp_atm, m_sys_timer_ntp_callback);
-  bsp_tmr_auto_start(&m_ntp_atm, ONE_MINUTE);
+  bsp_tmr_auto_start(&m_ntp_atm, ONE_SECOND);
 }
 
 void sys_time_get_epoch_ms(uint64_t *epoch)
@@ -111,8 +111,7 @@ static void m_sys_timer_ntp_callback(void *para)
   if (sys_wifi_is_connected())
     m_sys_time_sync_time_ntp();
 
-  m_ntp_atm.timer.interval = SYS_TIME_NTP_SYNC_INTEVAL_MS;
-  bsp_tmr_auto_restart(&m_ntp_atm);
+  bsp_tmr_auto_start(&m_ntp_atm, NTP_SYNC_INTEVAL_MS);
 }
 
 static void m_sys_time_sync_time_ntp(void)
