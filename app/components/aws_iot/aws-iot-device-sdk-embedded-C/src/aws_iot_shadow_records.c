@@ -121,8 +121,6 @@ IoT_Error_t registerJsonTokenOnDelta(jsonStruct_t *pStruct, const char *pShadowN
 								shadow_delta_callback,
 								NULL);
 
-	ESP_LOGW("Shadow", "Topic: %s", (char *)shadowDeltaTopic);
-
 	if(tokenTableIndex >= MAX_JSON_TOKEN_EXPECTED) {
 		return FAILURE;
 	}
@@ -420,7 +418,6 @@ IoT_Error_t publishToShadowAction(const char *pThingName, const char *pShadowNam
 	}
 
 	topicNameFromThingAndAction(TemporaryTopicName, pThingName, pShadowName, action, SHADOW_ACTION);
-	ESP_LOGI("TAG", "Topic name: %s", TemporaryTopicName);
 
 	msgParams.qos = QOS0;
 	msgParams.isRetained = 0;

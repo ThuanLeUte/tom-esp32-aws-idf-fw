@@ -141,7 +141,7 @@ bool sys_aws_shadow_update(sys_aws_shadow_name_t name)
                                           m_shadow_update_status_callback,
                                           NULL, 4, true);
 
-  ESP_LOGW(TAG, "Shadow update error code: %d", rc);
+  ESP_LOGI(TAG, "Shadow update error code: %d", rc);
 
   if (SUCCESS != rc)
     return false;
@@ -285,7 +285,8 @@ static void m_shadow_get_callback(const char          *p_thing_name,
   json_obs = findToken("state", p_received_json, json_token_struct);
   if (json_obs)
   {
-    ESP_LOGW(TAG, "state: %.*s", json_obs->end - json_obs->start, p_received_json + json_obs->start);
+    ESP_LOGI(TAG, "Shadow get callback");
+    printf("Payload: %.*s\n", json_obs->end - json_obs->start, p_received_json + json_obs->start);
 
     for (uint16_t i = 0; i < SYS_SHADOW_MAX; i++)
     {
@@ -316,7 +317,7 @@ static void m_shadow_scale_tare_callback(const char *p_json_string, uint32_t jso
   if (aws_parse_shadow_packet(SYS_SHADOW_SCALE_TARE, p_json_string, json_data_len, &scale_tare))
   {
     g_nvs_setting_data.scale_tare = scale_tare;
-    ESP_LOGW(TAG, "Scare tare: %d", g_nvs_setting_data.scale_tare);
+    ESP_LOGI(TAG, "Scare tare: %d", g_nvs_setting_data.scale_tare);
     SYS_NVS_STORE(scale_tare);
 
     sys_aws_shadow_trigger_command(SYS_AWS_SHADOW_CMD_SET, SYS_SHADOW_SCALE_TARE);

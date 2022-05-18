@@ -68,7 +68,7 @@ void sys_aws_jobs_send_update(const char *job_id, JobExecutionStatus status)
   rc = aws_iot_jobs_send_update(m_client, QOS0, m_thing_name, job_id, &update_request,
                                 topic_to_publish_update, sizeof(topic_to_publish_update), message_buffer, sizeof(message_buffer));
 
-  ESP_LOGW(TAG_JOB, "Error: %d, aws_iot_jobs_send_update: %s", rc, topic_to_publish_update);
+  ESP_LOGI(TAG_JOB, "Error: %d, aws_iot_jobs_send_update: %s", rc, topic_to_publish_update);
 }
 
 inline void __attribute__((always_inline)) sys_aws_jobs_init(AWS_IoT_Client *p_client, const char *thing_name, pApplicationHandler_t p_next_job_cb)
@@ -95,34 +95,34 @@ inline void __attribute__((always_inline)) sys_aws_jobs_init(AWS_IoT_Client *p_c
                                               p_next_job_cb, NULL, topic_to_subscribe_notify_next,
                                               sizeof(topic_to_subscribe_notify_next));
 
-  ESP_LOGW(TAG_JOB, "Error: %d, JOB_NOTIFY_NEXT_TOPIC  : %s", rc, topic_to_subscribe_notify_next);
+  ESP_LOGI(TAG_JOB, "Error: %d, JOB_NOTIFY_NEXT_TOPIC  : %s", rc, topic_to_subscribe_notify_next);
 
   rc = aws_iot_jobs_subscribe_to_job_messages(p_client, QOS0, thing_name,
                                               JOB_ID_NEXT, JOB_DESCRIBE_TOPIC, JOB_WILDCARD_REPLY_TYPE,
                                               p_next_job_cb, NULL, topic_to_subscribe_get_next,
                                               sizeof(topic_to_subscribe_get_next));
 
-  ESP_LOGW(TAG_JOB, "Error: %d, JOB_DESCRIBE_TOPIC     : %s", rc, topic_to_subscribe_get_next);
+  ESP_LOGI(TAG_JOB, "Error: %d, JOB_DESCRIBE_TOPIC     : %s", rc, topic_to_subscribe_get_next);
 
   rc = aws_iot_jobs_subscribe_to_job_messages(p_client, QOS0, thing_name,
                                               JOB_ID_WILDCARD, JOB_UPDATE_TOPIC, JOB_ACCEPTED_REPLY_TYPE,
                                               m_sys_aws_jobs_update_accepted_callback, NULL, topic_to_subscribe_update_accepted,
                                               sizeof(topic_to_subscribe_update_accepted));
 
-  ESP_LOGW(TAG_JOB, "Error: %d, JOB_UPDATE_TOPIC       : %s", rc, topic_to_subscribe_update_accepted);
+  ESP_LOGI(TAG_JOB, "Error: %d, JOB_UPDATE_TOPIC       : %s", rc, topic_to_subscribe_update_accepted);
 
   rc = aws_iot_jobs_subscribe_to_job_messages(p_client, QOS0, thing_name,
                                               JOB_ID_WILDCARD, JOB_UPDATE_TOPIC, JOB_REJECTED_REPLY_TYPE,
                                               m_sys_aws_jobs_update_rejected_callback, NULL, topic_to_subscribe_update_rejected,
                                               sizeof(topic_to_subscribe_update_rejected));
 
-  ESP_LOGW(TAG_JOB, "Error: %d, JOB_UPDATE_TOPIC       : %s", rc, topic_to_subscribe_update_rejected);
+  ESP_LOGI(TAG_JOB, "Error: %d, JOB_UPDATE_TOPIC       : %s", rc, topic_to_subscribe_update_rejected);
 
   rc = aws_iot_jobs_describe(p_client, QOS0, thing_name,
                              JOB_ID_NEXT, &describe_request, topic_to_publish_get_next,
                              sizeof(topic_to_publish_get_next), NULL, 0);
 
-  ESP_LOGW(TAG_JOB, "Error: %d, JOB_DESCRIBE_TOPIC  : %s", rc, topic_to_publish_get_next);
+  ESP_LOGI(TAG_JOB, "Error: %d, JOB_DESCRIBE_TOPIC  : %s", rc, topic_to_publish_get_next);
 
   aws_iot_mqtt_yield(p_client, 1000);
 }
@@ -150,7 +150,7 @@ static void m_sys_aws_jobs_update_accepted_callback(AWS_IoT_Client *p_client,
 {
   IOT_UNUSED(p_data);
   IOT_UNUSED(p_client);
-  ESP_LOGW(TAG_JOB, "AWS jobs update accepted callback");
+  ESP_LOGI(TAG_JOB, "AWS jobs update accepted callback");
   ESP_LOGI(TAG_JOB, "Topic: %.*s", topic_name_len, topic_name);
   ESP_LOGI(TAG_JOB, "Payload: %.*s", (int)params->payloadLen, (char *)params->payload);
 }
@@ -176,7 +176,7 @@ static void m_sys_aws_jobs_update_rejected_callback(AWS_IoT_Client *p_client,
 {
   IOT_UNUSED(p_data);
   IOT_UNUSED(p_client);
-  ESP_LOGW(TAG_JOB, "AWS jobs update rejected callback");
+  ESP_LOGI(TAG_JOB, "AWS jobs update rejected callback");
   ESP_LOGI(TAG_JOB, "Topic: %.*s", topic_name_len, topic_name);
   ESP_LOGI(TAG_JOB, "Payload: %.*s", (int)params->payloadLen, (char *)params->payload);
 }

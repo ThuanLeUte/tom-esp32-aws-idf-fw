@@ -191,8 +191,6 @@ IoT_Error_t aws_iot_shadow_update(AWS_IoT_Client *pClient, const char *pThingNam
 	rc = aws_iot_shadow_internal_action(pThingName, pShadowName, SHADOW_UPDATE, pJsonString, strlen(pJsonString), callback, pContextData,
 										timeout_seconds, isPersistentSubscribe);
 
-	ESP_LOGI("TAG", "rc: %d", rc);
-
 	FUNC_EXIT_RC(rc);
 }
 

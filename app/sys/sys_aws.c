@@ -158,9 +158,6 @@ static void m_sys_aws_task(void *params)
     {
       if (xQueueReceive(g_sys_aws.evt_queue, &service, pdMS_TO_TICKS(100)) == pdTRUE)
       {
-        ESP_LOGI(TAG, "Queue receive - Service type: %d", service.type);
-        ESP_LOGI(TAG, "Queue receive - Service cmd : %d", service.mqtt.cmd);
-
         if (service.type == SYS_AWS_SHADOW)
         {
           // Handle Shadow
@@ -313,8 +310,8 @@ static void m_sys_aws_jobs_next_job_callback(AWS_IoT_Client *p_client,
 
   IOT_UNUSED(p_data);
   IOT_UNUSED(p_client);
-  ESP_LOGW(TAG_JOB, "AWS jobs next job callback");
-  ESP_LOGW(TAG_JOB, "Topic: %.*s", topic_name_len, topic_name);
+  ESP_LOGI(TAG_JOB, "AWS jobs next job callback");
+  ESP_LOGI(TAG_JOB, "Topic: %.*s", topic_name_len, topic_name);
   ESP_LOGI(TAG_JOB, "Payload: %.*s", (int)params->payloadLen, (char *)params->payload);
 
   jsmn_init(&m_json_parser);

@@ -121,6 +121,8 @@ bool sys_aws_mqtt_publish(sys_aws_mqtt_pub_topic_t topic, char *buf)
 
   ESP_LOGI(TAG, "Publishing...: %s", aws_pub_topic);
 
+  printf("Payload: %s \n", buf);
+
   rc = aws_iot_mqtt_publish(&g_sys_aws.client, aws_pub_topic, strlen(aws_pub_topic), &params_publish_msg);
 
   if (SUCCESS != rc)

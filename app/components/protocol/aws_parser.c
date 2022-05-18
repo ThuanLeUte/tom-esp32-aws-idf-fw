@@ -38,8 +38,6 @@ bool aws_parse_shadow_packet(sys_aws_shadow_name_t name, const void *buf, uint16
   {
     uint16_t *scale_tare = p_data;
 
-    ESP_LOGW(TAG, "buf: %s", (const char *)buf);
-
     res = json_scanf((const char *)buf, (int)buf_len,
                      "{data:{scare_tare:%d}}",
                      scale_tare);

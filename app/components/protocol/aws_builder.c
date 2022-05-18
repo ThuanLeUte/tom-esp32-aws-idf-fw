@@ -120,8 +120,6 @@ void aws_build_notification(aws_noti_param_t *param, void *buf, uint32_t size)
                 DEV_DATA.longitude,
                 DEV_DATA.lattitude);
 
-    ESP_LOGI(TAG, "MQTT buffer: %s", (char *)buf);
-    
     break;
   
   default:
