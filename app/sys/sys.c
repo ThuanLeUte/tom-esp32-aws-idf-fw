@@ -93,8 +93,8 @@ void sys_run(void)
     device_data.battery      = 99;
     device_data.alarm_code   = 11;
 
-    device_data.longitude = 84.3880;
-    device_data.lattitude = 33.7490;
+    device_data.longitude = 10.762622;
+    device_data.lattitude = 106.660172;
     sys_aws_mqtt_send_noti(AWS_NOTI_DEVICE_DATA, &device_data);
 
     break;
