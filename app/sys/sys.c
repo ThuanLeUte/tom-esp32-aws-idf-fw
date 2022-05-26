@@ -86,15 +86,21 @@ void sys_run(void)
     bsp_delay_ms(5000);
 
     aws_noti_dev_data_t device_data;
-    sprintf(device_data.serial_number, "LOX-1234567");
+    sprintf(device_data.serial_number, "1812454ABC" ); 
+    
+    /* active devices 
+    ESP32C3_B2A6  -  serial # "141A14191A18"
+    ESP32C3_BBC6  -  serial # "1812454ABC"
+    */
     
     device_data.weight_scale = 1340;
     device_data.temp         = 101;
     device_data.battery      = 99;
     device_data.alarm_code   = 11;
 
-    device_data.longitude = 10.762622;
-    device_data.lattitude = 106.660172;
+    device_data.longitude = -84.3067;
+    device_data.lattitude = 34.1351;
+    
     sys_aws_mqtt_send_noti(AWS_NOTI_DEVICE_DATA, &device_data);
 
     break;

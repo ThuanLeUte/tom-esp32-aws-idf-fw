@@ -9,8 +9,9 @@ set(COMPONENT_SRCS "sys.c"
                    "sys_devcfg.c"
                    "sys_ota.c"
                    "sys_time.c"
+                   "../sys/lox/lox-job.cpp"
                    )
-
+                  
 set(COMPONENT_ADD_INCLUDEDIRS .
                               "../platform"
                               "../components/aws_iot/aws-iot-device-sdk-embedded-C/include"
