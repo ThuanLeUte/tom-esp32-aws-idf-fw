@@ -10,6 +10,7 @@ set(COMPONENT_SRCS "sys.c"
                    "sys_ota.c"
                    "sys_time.c"
                    "../sys/lox/lox-job.cpp"
+                   "sys_http_server.c"
                    )
                   
 set(COMPONENT_ADD_INCLUDEDIRS .
@@ -28,10 +29,18 @@ set(COMPONENT_ADD_INCLUDEDIRS .
 set(COMPONENT_EMBED_TXTFILES certs/aws-root-ca.pem 
                              certs/certificate.pem.crt
                              certs/private.pem.key
+                             index.html
                              )
  
 
-set(COMPONENT_REQUIRES nvs_flash jsmn spiffs bt esp_http_client esp_https_ota esp-tls app_update)
+set(COMPONENT_REQUIRES nvs_flash 
+                       jsmn spiffs
+                       bt esp_http_client
+                       esp_https_ota
+                       esp-tls
+                       app_update
+                       esp_http_server
+                       )
 
 register_component()
 

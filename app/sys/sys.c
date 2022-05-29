@@ -19,6 +19,7 @@
 #include "bsp.h"
 #include "sys_aws.h"
 #include "sys_ota.h"
+#include "sys_http_server.h"
 
 /* Private defines ---------------------------------------------------- */
 static const char *TAG = "sys";
@@ -42,23 +43,72 @@ void sys_boot(void)
   sys_nvs_init();
   bsp_spiffs_init();
   m_sys_evt_group_init();
+
+  // WiFi Setup ---------------------------------- {
   sys_wifi_init();
 
-  if (sys_wifi_is_configured())
+  // Check the device is provision or not
+  if (FLAG_QRCODE_SET_SUCCESS == g_nvs_setting_data.dev.qr_code_flag)
   {
-    sys_wifi_connect();
+    // Check perious WiFi mode.
+    if (g_nvs_setting_data.wifi.mode == SYS_WIFI_MODE_STA)
+    {
+__LBL_WEBPAGE_SETUP_:
+      // Enter WiFi setup by Web server.
+      sys_wifi_softap_init();
+      sys_http_server_start();
 
-    // Check OTA enable or not
-    if (g_nvs_setting_data.ota.enable)
-      sys_ota_start();
+      // Save current WiFi mode.
+      g_nvs_setting_data.wifi.mode = SYS_WIFI_MODE_AP;
+      SYS_NVS_STORE(wifi);
+
+      FSM_UPDATE_STATE(SYS_STATE_NW_SETUP);
+    }
     else
-      FSM_UPDATE_STATE(SYS_STATE_READY);
+    {
+      // Check WiFi setup in the STA mode
+      if ((strlen((char *)g_nvs_setting_data.wifi.pwd) != 0) && (strlen((char *)g_nvs_setting_data.wifi.uiid) != 0))
+      {
+        // Save current WiFi mode.
+        g_nvs_setting_data.wifi.mode = SYS_WIFI_MODE_STA;
+        SYS_NVS_STORE(wifi);
+
+        sys_wifi_sta_init();
+        sys_wifi_config_set(g_nvs_setting_data.wifi.uiid, g_nvs_setting_data.wifi.pwd);
+        sys_wifi_connect();
+
+        // Check OTA enable or not
+        if (g_nvs_setting_data.ota.enable)
+          sys_ota_start();
+        else
+          FSM_UPDATE_STATE(SYS_STATE_READY);
+      }
+      else // WiFi is not setup --> Enter Webpage setup again
+      {
+        goto __LBL_WEBPAGE_SETUP_;
+      }
+    }
   }
-  else
+  else // Setup WiFi by BluFi at the Factory
   {
-    sys_devcfg_init();
-    FSM_UPDATE_STATE(SYS_STATE_NW_SETUP);
+    sys_wifi_sta_init();
+
+    if (!sys_wifi_is_configured())
+    {
+      sys_devcfg_init();
+      FSM_UPDATE_STATE(SYS_STATE_NW_SETUP);
+    }
+    else
+    {
+      // Save current WiFi mode.
+      g_nvs_setting_data.wifi.mode = SYS_WIFI_MODE_AP;
+      SYS_NVS_STORE(wifi);
+
+      sys_wifi_connect();
+      FSM_UPDATE_STATE(SYS_STATE_READY);
+    }
   }
+  // ------------------------------------------ }
 }
 
 void sys_run(void)

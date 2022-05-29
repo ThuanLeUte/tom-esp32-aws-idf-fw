@@ -7,6 +7,10 @@
         "sys_aws_provision.h": "c",
         "platform_common.h": "c",
         "sys_aws_config.h": "c",
-        "sys_ota.h": "c"
+        "sys_ota.h": "c",
+        "sys_http_server.h": "c",
+        "jsmn.h": "c",
+        "sys_wifi.h": "c",
+        "sys_devcfg.h": "c"
     }
 }

@@ -80,11 +80,11 @@ void sys_aws_init(void)
   {
     sys_aws_provision_init_params_t init_params = { 0 };
 
-    init_params.aws_client_id_len    = strlen(g_nvs_setting_data.mac_device_addr),
+    init_params.aws_client_id_len    = strlen("12222"), // TODO: Get the MAC ADDR
     init_params.qr_code_len          = strlen(g_nvs_setting_data.dev.qr_code);
     init_params.provision_success_cb = m_sys_aws_provision_success_callback;
 
-    memcpy(init_params.aws_client_id, g_nvs_setting_data.mac_device_addr, init_params.aws_client_id_len);
+    memcpy(init_params.aws_client_id, "12222", init_params.aws_client_id_len);
     memcpy(init_params.qr_code, g_nvs_setting_data.dev.qr_code, init_params.qr_code_len);
 
     // Check provisioning status

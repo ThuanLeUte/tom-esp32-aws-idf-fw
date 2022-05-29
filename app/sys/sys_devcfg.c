@@ -401,12 +401,6 @@ static void m_blufi_event_callback(esp_blufi_cb_event_t event, esp_blufi_cb_para
     m_mgr.ble.connected = false;
     blufi_security_deinit();
     esp_ble_gap_start_advertising(&adv_params);
-
-    // Restart after WiFi connected
-    if (m_mgr.wifi.connected)
-    {
-      esp_restart();
-    }
     break;
   }
   case ESP_BLUFI_EVENT_SET_WIFI_OPMODE:
@@ -460,6 +454,11 @@ static void m_blufi_event_callback(esp_blufi_cb_event_t event, esp_blufi_cb_para
   case ESP_BLUFI_EVENT_RECV_SLAVE_DISCONNECT_BLE:
   {
     esp_blufi_close(m_mgr.ble.server_if, m_mgr.ble.conn_id);
+    
+    // Restart after WiFi connected
+    if (m_mgr.wifi.connected)
+      esp_restart();
+    
     break;
   }
   case ESP_BLUFI_EVENT_RECV_STA_BSSID:

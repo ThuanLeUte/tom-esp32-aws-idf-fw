@@ -19,15 +19,33 @@
 
 /* Public defines ----------------------------------------------------- */
 #define WIFI_CONNECT_TIMEOUT_MS         (20000)     // 20s
+#define WIFI_MAX_STATION_NUM            (100)       // Max wifi stations store in flash
 
 /* Public enumerate/structure ----------------------------------------- */
+typedef enum
+{
+  SYS_WIFI_MODE_STA = 0,
+  SYS_WIFI_MODE_AP
+}
+sys_wifi_mode_t;
+
 /* Public macros ------------------------------------------------------ */
 /* Public variables --------------------------------------------------- */
 /* Public function prototypes ----------------------------------------- */
 /**
- * @brief         Start task handle IO
+ * @brief         Init WiFi
  */
 void sys_wifi_init(void);
+
+/**
+ * @brief         Init WiFi station
+ */
+void sys_wifi_sta_init(void);
+
+/**
+ * @brief         Init WiFi softap
+ */
+void sys_wifi_softap_init(void);
 
 /**
  * @brief         Wifi connect
@@ -35,17 +53,17 @@ void sys_wifi_init(void);
 void sys_wifi_connect(void);
 
 /**
- * @brief         Check that wifi is connected or not
+ * @brief         Check that WiFi is connected or not
  */
 bool sys_wifi_is_connected(void);
 
 /**
- * @brief         Erase wifi config
+ * @brief         Erase WiFi config
  */
 void sys_wifi_erase_config(void);
 
 /**
- * @brief         Check that wifi is configured or not
+ * @brief         Check that WiFi is configured or not
  */
 bool sys_wifi_is_configured(void);
 
@@ -58,6 +76,12 @@ void sys_wifi_set_connection_status(bool status);
  * @brief         Update event handler
  */
 void sys_wifi_update_event_handler(void);
+
+/**
+ * @brief         WiFi config set
+ * 
+ */
+void sys_wifi_config_set(const char *ssid, const char *pwd);
 
 #endif /* __SYS_WIFI_H */
 
