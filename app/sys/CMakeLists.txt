@@ -29,7 +29,24 @@ set(COMPONENT_ADD_INCLUDEDIRS .
 set(COMPONENT_EMBED_TXTFILES certs/aws-root-ca.pem 
                              certs/certificate.pem.crt
                              certs/private.pem.key
-                             index.html
+                             web/login.html
+                             web/main.html
+                             web/css/bootstrap.min.css
+                             web/css/pixie-main.css
+                             web/js/bootstrap.min.js
+                             web/js/pixie-custom.js
+                             web/js/jquery.min.js
+                             web/images/ap.png
+                             web/images/eye-close.png
+                             web/images/light.png
+                             web/images/network.png
+                             web/images/other.png
+                             web/images/periperal.png
+                             web/images/reboot.png
+                             web/images/service.png
+                             web/images/status.png
+                             web/images/timezone.png
+                             web/images/upgrade.png
                              )
  
 
