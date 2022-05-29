@@ -16,6 +16,7 @@
 
 /* Includes ----------------------------------------------------------- */
 #include "platform_common.h"
+#include "sys_wifi.h"
 
 /* Public defines ----------------------------------------------------- */
 // IMPORTANT: The revision of nvs_data_t. Everytime nvs_data_t is changed, 
@@ -44,6 +45,14 @@ typedef struct nvs_data_struct
     char url[100];
   }
   ota;
+
+  struct
+  {
+    char uiid[50];
+    char pwd[50];
+    sys_wifi_mode_t mode;
+  }
+  wifi;
 
   uint16_t scale_tare;
 }

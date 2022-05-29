@@ -19,6 +19,7 @@
 #include "bsp.h"
 #include "sys_aws.h"
 #include "sys_ota.h"
+#include "sys_http_server.h"
 
 /* Private defines ---------------------------------------------------- */
 static const char *TAG = "sys";
@@ -61,17 +62,15 @@ __LBL_WEBPAGE_SETUP_:
       g_nvs_setting_data.wifi.mode = SYS_WIFI_MODE_AP;
       SYS_NVS_STORE(wifi);
 
-      // Wait 2 minutes and restart.
-      bsp_delay_ms(20 * 1000);
-      esp_restart();
+      FSM_UPDATE_STATE(SYS_STATE_NW_SETUP);
     }
     else
     {
       // Check WiFi setup in the STA mode
-      if (strlen((char *)g_nvs_setting_data.wifi.pwd) != 0)
+      if ((strlen((char *)g_nvs_setting_data.wifi.pwd) != 0) && (strlen((char *)g_nvs_setting_data.wifi.uiid) != 0))
       {
         // Save current WiFi mode.
-        g_nvs_setting_data.wifi.mode = SYS_WIFI_MODE_AP;
+        g_nvs_setting_data.wifi.mode = SYS_WIFI_MODE_STA;
         SYS_NVS_STORE(wifi);
 
         sys_wifi_sta_init();

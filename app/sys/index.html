@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Device configuration</h2>
+
+  <label for="fname">WiFi SSID:</label><br>
+  <input type="text" id="ssid" value=""><br>
+  <label for="lname">WiFi Password:</label><br>
+  <input type="text" id="password" value=""><br>
+  <label for="lname">Device ID:</label><br>
+  <input type="text" id="device_id" value=""><br>
+
+  <input type="submit" value="Setup" onclick="myFunction()">
+
+  <script>
+    var xhttp = new XMLHttpRequest();
+
+    function myFunction() {
+      xhttp.open("POST", "/setup_btn", true);
+
+      var setup_obj = new Object();
+
+      setup_obj.ssid      = document.getElementById("ssid").value;
+      setup_obj.password  = document.getElementById("password").value;
+      setup_obj.device_id = document.getElementById("device_id").value;
+
+      // Convert object to json string
+      var string = JSON.stringify(setup_obj);
+
+      xhttp.send(string);
+    }
+
+  </script>
+
+</body>
+</html>
+

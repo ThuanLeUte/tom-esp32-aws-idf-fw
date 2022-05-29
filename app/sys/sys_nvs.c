@@ -47,6 +47,7 @@ const nvs_key_data_t nvs_data_list[] =
   , NVS_DATA_PAIR("0004", provision_status)
   , NVS_DATA_PAIR("0005", ota)
   , NVS_DATA_PAIR("0006", scale_tare)
+  , NVS_DATA_PAIR("0007", wifi)
 };
 
 /* Private macros ----------------------------------------------------- */
@@ -63,6 +64,8 @@ void sys_nvs_reset_data(void)
   g_nvs_setting_data.data_version     = NVS_DATA_VERSION;
   g_nvs_setting_data.provision_status = (uint8_t)(AWS_PROVISION_NONE);
   g_nvs_setting_data.scale_tare       = 0;
+  
+  memset(&g_nvs_setting_data.wifi, 0, sizeof(g_nvs_setting_data.wifi));
 }
 
 void sys_nvs_init(void)
