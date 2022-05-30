@@ -38,8 +38,8 @@ static const char *TAG = "sys_wifi";
 #define ESP_WIFI_PASS                   "123456789"
 #define ESP_WIFI_CHANNEL                (1)
 #define MAX_STA_CONN                    (1)
-// #define SOFT_ACCESS_POINT_WAIT_TIME     (2 * 60 * 1000) // 2 minutes
-#define SOFT_ACCESS_POINT_WAIT_TIME     (30 * 1000) // 2 minutes
+#define SOFT_ACCESS_POINT_WAIT_TIME     (2 * 60 * 1000) // 2 minutes
+// #define SOFT_ACCESS_POINT_WAIT_TIME     (30 * 1000) // 2 minutes
 
 /* Private variables -------------------------------------------------------- */
 /* Private function prototypes ---------------------------------------------- */
