@@ -1,0 +1,125 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset=utf-8>
+    <meta http-equiv=X-UA-Compatible content=IE=edge>
+    <meta name=viewport content="width=device-width, initial-scale=1">
+    <title>Main</title>
+    <link href=web/css/bootstrap.min.css rel=stylesheet>
+    <link href=web/css/pixie-main.css rel=stylesheet>
+</head>
+
+<body>
+    <div class=main-box>
+        <ul class="nav nav-pills">
+            <li>
+                <a data-toggle=pill href=status>
+                    <img src=web/images/status.png alt>Status</a>
+            </li>
+            <li class=active>
+                <a data-toggle=pill href=network>
+                    <img src=web/images/network.png alt>Network</a>
+            </li>
+            <li id="liService">
+                <a data-toggle=pill href=service>
+                    <img src=web/images/service.png alt>Service</a>
+            </li>
+            <li>
+                <a data-toggle=pill href=other>
+                    <img src=web/images/other.png alt>Other</a>
+            </li>
+        </ul>
+        <div class=tab-content>
+            <div id=network class="tab-pane fade in active">
+                <div class=panel-group id=accordion>
+
+                    <div class="panel panel-default">
+                        <div class=panel-heading>
+                            <h4 class=panel-title>
+                                <a class=active data-toggle=collapse data-parent=#accordion href=#collapse1> Wi-Fi settings 
+                                    <label class=switch>
+                                        <input type=checkbox>
+                                        <span class="slider round"></span>
+                                    </label>
+                                </a>
+                            </h4>
+                        </div>
+                        <div id=collapse1 class="panel-collapse collapse">
+                            <div class=panel-body>
+                                <div class=form-group>
+                                    <label>Nearby WLAN</label>
+                                    <select class="mdb-select form-control" id="drpWLAN" placeholder="scan for wifi">
+                                        <!-- <option value=1 placeholder="scan for wifi" ></option> -->
+
+                                    </select>
+                                </div>
+                                <div class=form-group>
+                                    <label for=defaultFormCardEmailEx
+                                        class="grey-text font-weight-light">Password</label>
+                                    <input type=password id="wifi_pass" class=form-control placeholder=Password> 
+                                      <input type="checkbox" onclick="Router_passFunction()">Show Password
+
+                                </div>
+
+                                <div class=text-center>
+                                    <button class="btn btn-block" type="button" id="scan_wifi" title=scan>Scan
+                                        Wi-fi</button>
+                                </div>
+                                <div class=form-group>
+                                    <label>Mode</label>
+                                    <select class="mdb-select-repeater form-control" id="wifi_MODE">
+                                        <option value=1 class=inner-dhcp-box>dhcp</option>
+                                        <option value=2 class=inner-static-box>static</option>
+                                    </select>
+                                </div>
+                                <div class=box-4>
+                                    <form>
+                                        <div class=form-group>
+                                            <label for=defaultFormCardNameEx class="grey-text font-weight-light">
+                                                <span class=require>*</span>IP Address</label>
+                                            <input type=text id="txtipadd" class=form-control placeholder="IP Address">
+                                        </div>
+                                        <div class=form-group>
+                                            <label for=defaultFormCardEmailEx class="grey-text font-weight-light">
+                                                <span class=require>*</span>NetMask</label>
+                                            <input type=email id="net_m" class=form-control placeholder=NetMask> </div>
+                                        <div class=form-group>
+                                            <label for=defaultFormCardEmailEx class="grey-text font-weight-light">
+                                                <span class=require>*</span>Gateway Address</label>
+                                            <input type=text id="G_add" class=form-control
+                                                placeholder="Gateway Address"> </div>
+                                        <div class=form-group>
+                                            <label for=defaultFormCardEmailEx class="grey-text font-weight-light">
+                                                <span class=require>*</span>Primary DNS Address</label>
+                                            <input type=text id="P_dns" class=form-control
+                                                placeholder="Primary DNS Address"> </div>
+                                        <div class=form-group>
+                                            <label for=defaultFormCardEmailEx
+                                                class="grey-text font-weight-light">Secondary DNS Address</label>
+                                            <input type=text id="S_dns" class=form-control
+                                                placeholder="Secondary DNS Address"> </div>
+                                    </form>
+                                </div>
+                                <div class=text-center>
+                                    <button class="btn btn-block" type="button" id="con_btn"
+                                        title=Connect>Connect</button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        </div>
+         </div>
+         <script src=web/js/jquery.min.js> </script>
+         <script src=web/js/bootstrap.min.js> </script>
+         <script src=web/js/pixie-custom.js> </script>
+         <script type="text/javascript"></script>
+
+</body>
+
+</html>

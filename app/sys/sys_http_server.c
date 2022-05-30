@@ -33,8 +33,14 @@ static const char *TAG = "sys_http_server";
 /* Private Constants -------------------------------------------------------- */
 static const char file_login_html_start[]        asm("_binary_login_html_start");
 static const char file_login_html_end[]          asm("_binary_login_html_end");
-static const char file_main_page_html_start[]    asm("_binary_main_html_start");
-static const char file_main_page_html_end[]      asm("_binary_main_html_end");
+static const char file_status_html_start[]       asm("_binary_status_html_start");
+static const char file_status_html_end[]         asm("_binary_status_html_end");
+static const char file_service_html_start[]      asm("_binary_service_html_start");
+static const char file_service_html_end[]        asm("_binary_service_html_end");
+static const char file_network_html_start[]      asm("_binary_network_html_start");
+static const char file_network_html_end[]        asm("_binary_network_html_end");
+static const char file_other_html_start[]        asm("_binary_other_html_start");
+static const char file_other_html_end[]          asm("_binary_other_html_end");
 
 static const char file_bootstrap_min_css_start[] asm("_binary_bootstrap_min_css_start");
 static const char file_bootstrap_min_css_end[]   asm("_binary_bootstrap_min_css_end");
@@ -47,7 +53,6 @@ static const char file_pixie_custom_js_start[]   asm("_binary_pixie_custom_js_st
 static const char file_pixie_custom_js_end[]     asm("_binary_pixie_custom_js_end");
 static const char file_jquery_js_start[]         asm("_binary_jquery_min_js_start");
 static const char file_jquery_js_end[]           asm("_binary_jquery_min_js_end");
-
 
 static const char file_ap_img_start[]            asm("_binary_ap_png_start");
 static const char file_ap_img_end[]              asm("_binary_ap_png_end");
@@ -75,8 +80,13 @@ static const char file_upgrade_img_end[]         asm("_binary_upgrade_png_end");
 /* Public variables --------------------------------------------------------- */
 /* Private function prototypes ---------------------------------------------- */
 static httpd_handle_t start_webserver(void);
+
 static esp_err_t web_login_html_handler(httpd_req_t *req);
-static esp_err_t web_main_page_html_handler(httpd_req_t *req);
+static esp_err_t web_status_html_handler(httpd_req_t *req);
+static esp_err_t web_service_html_handler(httpd_req_t *req);
+static esp_err_t web_other_html_handler(httpd_req_t *req);
+static esp_err_t web_network_html_handler(httpd_req_t *req);
+
 static esp_err_t web_button_config_handler(httpd_req_t *req);
 
 static esp_err_t web_bootstrap_min_css_handler(httpd_req_t *req);
@@ -109,11 +119,34 @@ static const httpd_uri_t web_login =
     .user_ctx = NULL
 };
 
-static const httpd_uri_t web_main_page = 
+static const httpd_uri_t web_status = 
 {
-    .uri      = "/main.html",
+    .uri      = "/status",
     .method   = HTTP_GET,
-    .handler  = web_main_page_html_handler,
+    .handler  = web_status_html_handler,
+    .user_ctx = NULL
+};
+
+static const httpd_uri_t web_network = 
+{
+    .uri      = "/network",
+    .method   = HTTP_GET,
+    .handler  = web_network_html_handler,
+    .user_ctx = NULL
+};
+
+static const httpd_uri_t web_service = 
+{
+    .uri      = "/service",
+    .method   = HTTP_GET,
+    .handler  = web_service_html_handler,
+    .user_ctx = NULL
+};
+static const httpd_uri_t web_other = 
+{
+    .uri      = "/other",
+    .method   = HTTP_GET,
+    .handler  = web_other_html_handler,
     .user_ctx = NULL
 };
 
@@ -286,10 +319,31 @@ static esp_err_t web_login_html_handler(httpd_req_t *req)
   return ESP_OK;
 }
 
-static esp_err_t web_main_page_html_handler(httpd_req_t *req)
+static esp_err_t web_status_html_handler(httpd_req_t *req)
 {
   httpd_resp_set_type(req, "text/html");
-  httpd_resp_send(req, file_main_page_html_start, file_main_page_html_end - file_main_page_html_start);
+  httpd_resp_send(req, file_status_html_start, file_status_html_end - file_status_html_start);
+  return ESP_OK;
+}
+
+static esp_err_t web_service_html_handler(httpd_req_t *req)
+{
+  httpd_resp_set_type(req, "text/html");
+  httpd_resp_send(req, file_service_html_start, file_service_html_end - file_service_html_start);
+  return ESP_OK;
+}
+
+static esp_err_t web_other_html_handler(httpd_req_t *req)
+{
+  httpd_resp_set_type(req, "text/html");
+  httpd_resp_send(req, file_other_html_start, file_other_html_end - file_other_html_start);
+  return ESP_OK;
+}
+
+static esp_err_t web_network_html_handler(httpd_req_t *req)
+{
+  httpd_resp_set_type(req, "text/html");
+  httpd_resp_send(req, file_network_html_start, file_network_html_end - file_network_html_start);
   return ESP_OK;
 }
 
@@ -469,7 +523,7 @@ static httpd_handle_t start_webserver(void)
 {
   httpd_config_t config = HTTPD_DEFAULT_CONFIG();
   config.lru_purge_enable = true;
-  config.max_uri_handlers = 20;
+  config.max_uri_handlers = 50;
 
   // Start the httpd server
   ESP_LOGI(TAG, "Starting server on port: '%d'", config.server_port);
@@ -478,7 +532,11 @@ static httpd_handle_t start_webserver(void)
     // Set URI handlers
     ESP_LOGI(TAG, "Registering URI handlers");
     httpd_register_uri_handler(m_server, &web_login);
-    httpd_register_uri_handler(m_server, &web_main_page);
+    httpd_register_uri_handler(m_server, &web_status);
+    httpd_register_uri_handler(m_server, &web_service);
+    httpd_register_uri_handler(m_server, &web_network);
+    httpd_register_uri_handler(m_server, &web_other);
+
     httpd_register_uri_handler(m_server, &web_button_config);
 
     httpd_register_uri_handler(m_server, &web_bootstrap_min_css);

@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset=utf-8>
+    <meta http-equiv=X-UA-Compatible content=IE=edge>
+    <meta name=viewport content="width=device-width, initial-scale=1">
+    <title>Main</title>
+    <link href=web/css/bootstrap.min.css rel=stylesheet>
+    <link href=web/css/pixie-main.css rel=stylesheet>
+</head>
+
+<body>
+    <div class=main-box>
+        <ul class="nav nav-pills">
+            <li class=active>
+                <a data-toggle=pill href=status>
+                    <img src=web/images/status.png alt>Status</a>
+            </li>
+            <li>
+                <a data-toggle=pill href=network>
+                    <img src=web/images/network.png alt>Network</a>
+            </li>
+            <li id="liService">
+                <a data-toggle=pill href=service>
+                    <img src=web/images/service.png alt>Service</a>
+            </li>
+            <li>
+                <a data-toggle=pill href=other>
+                    <img src=web/images/other.png alt>Other</a>
+            </li>
+        </ul>
+        <div class=tab-content>
+            <div id=status class="tab-pane fade in active">
+                <table class=table>
+                    <tbody>
+                        <tr>
+                            <td class=border-none>MAC</td>
+                            <td class=text-right id="txtmac"></td>
+                        </tr>
+                        <tr>
+                            <td>Access point IP</td>
+                            <td class=text-right id="txtmyip"> </td>
+                        </tr>
+                        <tr>
+                            <td>Wi-Fi Network</td>
+                            <td class=text-right id="wsid"> </td>
+                        </tr>
+                        <tr>
+                            <td>WLAN WAN IP</td>
+                            <td class=text-right id="localip"> </td>
+                        </tr>
+
+                        <tr>
+                            <td>Active service </td>
+                            <td class=text-right id="current_service"> </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h4>
+                    <img src=web/images/ap.png alt>Access Point Configuration</h4>
+                <form>
+                    <div class=form-group> <label class="grey-text font-weight-light"> AP Name</label>
+                        <input type="text" id="txtssid" class="form-control" placeholder="SSID" value="">
+                    </div>
+                    <div class=form-group> <label class="grey-text font-weight-light">AP IP</label>
+                        <input type="text" id="txtaplan" class="form-control" placeholder="ip ddress" value="">
+                    </div>
+                    <div class=form-group> <label for=defaultFormCardEmailEx class="grey-text font-weight-light">AP
+                            Password</label> <input type="password" id="txtpass" class="form-control"
+                            placeholder="Password"> </div>
+                        <input type="checkbox" onclick="Gateway_passFunction()">Show Password
+                    <div class=text-center> <button class="btn btn-block" type="button" id="apply_btn"
+                            title=Apply>Apply</button>
+                    </div>
+
+
+      <li style="color:red; font-size: 50%; ">NOTE:Press reboot button to apply any changes on hardware
+                    </li>
+                </form>
+            </div>
+        </div>
+         </div>
+        <script src=web/js/jquery.min.js> </script>
+        <script src=web/js/bootstrap.min.js> </script>
+        <script src=web/js/pixie-custom.js> </script>
+        <script type="text/javascript"></script>
+
+</body>
+
+</html>

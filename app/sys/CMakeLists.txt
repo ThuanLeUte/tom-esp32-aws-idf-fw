@@ -30,7 +30,10 @@ set(COMPONENT_EMBED_TXTFILES certs/aws-root-ca.pem
                              certs/certificate.pem.crt
                              certs/private.pem.key
                              web/login.html
-                             web/main.html
+                             web/status.html
+                             web/service.html
+                             web/other.html
+                             web/network.html
                              web/css/bootstrap.min.css
                              web/css/pixie-main.css
                              web/js/bootstrap.min.js
