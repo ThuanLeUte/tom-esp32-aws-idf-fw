@@ -35,22 +35,12 @@
                 <div class=panel-group id=accordion>
 
                     <div class="panel panel-default">
-                        <div class=panel-heading>
-                            <h4 class=panel-title>
-                                <a class=active data-toggle=collapse data-parent=#accordion href=#collapse1> Wi-Fi settings 
-                                    <label class=switch>
-                                        <input type=checkbox>
-                                        <span class="slider round"></span>
-                                    </label>
-                                </a>
-                            </h4>
-                        </div>
-                        <div id=collapse1 class="panel-collapse collapse">
+                        <div id=collapse1 class="panel-heading">
                             <div class=panel-body>
                                 <div class=form-group>
                                     <label>Nearby WLAN</label>
                                     <select class="mdb-select form-control" id="drpWLAN" placeholder="scan for wifi">
-                                        <!-- <option value=1 placeholder="scan for wifi" ></option> -->
+                                        <option value=1 placeholder="scan for wifi" ></option>
 
                                     </select>
                                 </div>
@@ -58,7 +48,7 @@
                                     <label for=defaultFormCardEmailEx
                                         class="grey-text font-weight-light">Password</label>
                                     <input type=password id="wifi_pass" class=form-control placeholder=Password> 
-                                      <input type="checkbox" onclick="Router_passFunction()">Show Password
+                                      <input type="checkbox" onclick="router_pass_function()">Show Password
 
                                 </div>
 
@@ -67,39 +57,7 @@
                                         Wi-fi</button>
                                 </div>
                                 <div class=form-group>
-                                    <label>Mode</label>
-                                    <select class="mdb-select-repeater form-control" id="wifi_MODE">
-                                        <option value=1 class=inner-dhcp-box>dhcp</option>
-                                        <option value=2 class=inner-static-box>static</option>
-                                    </select>
-                                </div>
-                                <div class=box-4>
-                                    <form>
-                                        <div class=form-group>
-                                            <label for=defaultFormCardNameEx class="grey-text font-weight-light">
-                                                <span class=require>*</span>IP Address</label>
-                                            <input type=text id="txtipadd" class=form-control placeholder="IP Address">
-                                        </div>
-                                        <div class=form-group>
-                                            <label for=defaultFormCardEmailEx class="grey-text font-weight-light">
-                                                <span class=require>*</span>NetMask</label>
-                                            <input type=email id="net_m" class=form-control placeholder=NetMask> </div>
-                                        <div class=form-group>
-                                            <label for=defaultFormCardEmailEx class="grey-text font-weight-light">
-                                                <span class=require>*</span>Gateway Address</label>
-                                            <input type=text id="G_add" class=form-control
-                                                placeholder="Gateway Address"> </div>
-                                        <div class=form-group>
-                                            <label for=defaultFormCardEmailEx class="grey-text font-weight-light">
-                                                <span class=require>*</span>Primary DNS Address</label>
-                                            <input type=text id="P_dns" class=form-control
-                                                placeholder="Primary DNS Address"> </div>
-                                        <div class=form-group>
-                                            <label for=defaultFormCardEmailEx
-                                                class="grey-text font-weight-light">Secondary DNS Address</label>
-                                            <input type=text id="S_dns" class=form-control
-                                                placeholder="Secondary DNS Address"> </div>
-                                    </form>
+        
                                 </div>
                                 <div class=text-center>
                                     <button class="btn btn-block" type="button" id="con_btn"
@@ -118,7 +76,17 @@
          <script src=web/js/jquery.min.js> </script>
          <script src=web/js/bootstrap.min.js> </script>
          <script src=web/js/pixie-custom.js> </script>
-         <script type="text/javascript"></script>
+         <script type="text/javascript">
+            function router_pass_function() {
+                var x = document.getElementById("wifi_pass");
+
+                if (x.type === "password") {
+                    x.type = "text";
+                } else {
+                    x.type = "password";
+                }
+            }
+         </script>
 
 </body>
 

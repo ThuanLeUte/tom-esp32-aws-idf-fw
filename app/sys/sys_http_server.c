@@ -406,14 +406,14 @@ static esp_err_t web_other_img_handler(httpd_req_t *req)
 static esp_err_t web_peripheral_img_handler(httpd_req_t *req)
 {
   httpd_resp_set_type(req, "image/png");
-  httpd_resp_send(req, file_peripheral_img_start, file_jquery_js_end - file_peripheral_img_start);
+  httpd_resp_send(req, file_peripheral_img_start, file_peripheral_img_end - file_peripheral_img_start);
   return ESP_OK;
 }
 
 static esp_err_t web_reboot_img_handler(httpd_req_t *req)
 {
   httpd_resp_set_type(req, "image/png");
-  httpd_resp_send(req, file_jquery_js_start, file_peripheral_img_end - file_jquery_js_start);
+  httpd_resp_send(req, file_reboot_img_start, file_reboot_img_end - file_reboot_img_start);
   return ESP_OK;
 }
 

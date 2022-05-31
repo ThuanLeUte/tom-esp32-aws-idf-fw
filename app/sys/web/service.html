@@ -31,116 +31,37 @@
             </li>
         </ul>
         <div class=tab-content>
+            <table class=table>
+                <tbody>
+                    <tr>
+                        <td class=border-none>Hardware Version ID:</td>
+                        <td class=text-right id="hw_ver_id"></td>
+                    </tr>
+                    <tr>
+                        <td class=border-none>Firmware Version ID:</td>
+                        <td class=text-right id="fw_ver_id"></td>
+                    </tr>
+                </tbody>
+            </table>
+
             <div id=service class="tab-pane fade in active">
                 <div class=form-group>
-                    <label>Service Access</label>
-                    <select class="mdb-select form-control sevice-access" id="service_acc">
-                        <option value="MQTT" class=mqtt-box>MQTT</option>
-                        <option value="HTTP" class=http-box>HTTP</option>
-                        <option value="TCP" class=TCP-box>TCP</option>
-                    </select>
-                </div>
-                <div class=form-group>
-                    <label>Upload Interval</label>
-                    <div class=row>
-                        <div class=col-md-4>
-                            <input type=text id="uinterval" class=form-control placeholder="number"> </div>
-                        <div class=col-md-8>
-                            <select class="mdb-select form-control" id="u_time">
-                                <option value=2>Second</option>
-                                <option value=3>Minute</option>
-                                <option value=4>Hour</option>
-                            </select>
-                        </div>
-                    </div>
                 </div>
                 <div class=box-1 >
                     <div class=form-group>
-                        <div class=row>
-                            <div class=col-md-8> <label>Host IP/ Address</label>
-                                <input type=text id="hipadd" class=form-control placeholder="Mqtt Broker Address">
-                            </div>
-                            <div class=col-md-4><label>Port</label>
-                                <input type=text id="port" class=form-control placeholder="1883" value=""> </div>
-                        </div>
                     </div>
                     <div class=form-group>
-                        <label for=defaultFormCardEmailEx class="grey-text font-weight-light">Client ID</label>
-                        <input type=text id="c_id" class=form-control placeholder="Client ID">
-                    </div>
-
-                    <div class=form-group>
-                        <label for=defaultFormCardEmailEx class="grey-text font-weight-light">Qos</label>
-                        <select class="mdb-select form-control" id="QOS">
-                            <option value=1>0</option>
-                            <option value=2>1</option>
-                            <option value=3>2</option>
-
-                        </select>
+                        <label for=defaultFormCardEmailEx class="grey-text font-weight-light">Tare Values</label>
+                        <input type=text id="tare_value" class=form-control placeholder="Value">
                     </div>
                     <div class=form-group>
-                        <label for=defaultFormCardEmailEx class="grey-text font-weight-light">Username</label>
-                        <input type=text id="U_name" class=form-control placeholder=Username> </div>
+                        <label for=defaultFormCardEmailEx class="grey-text font-weight-light">Sleep Duration (mins)</label>
+                        <input type=text id="sleep_duration" class=form-control placeholder=Duration> </div>
 
                     <div class=form-group>
-                        <label for=defaultFormCardEmailEx class="grey-text font-weight-light">Password</label>
-                        <input type="text" id="s_pass" class=form-control placeholder="Password OR Token"> </div>
-                    <div class=form-group>
-                        <label for=defaultFormCardEmailEx class="grey-text font-weight-light"> Publish Topic</label>
-                        <input type=text id="p_topic" class=form-control placeholder="Status Publish Topic"> </div>
-
+                        <label for=defaultFormCardEmailEx class="grey-text font-weight-light">Volume offline data record</label>
+                        <input type="text" id="offline_cnt" class=form-control placeholder="Count"> </div>
                 </div>
-
-                <div class=box-2>
-                    <div class=form-group>
-                        <div class=row>
-                            <div class=col-md-8>
-                                <label>Host IP/ Address</label>
-                                <input type=text id="txtHttp_host" class=form-control placeholder="iot.beaconyun.com">
-                            </div>
-                            <div class=col-md-4> <label>port</label>
-                                <input type=text id="txtHttp_port" class=form-control placeholder="1883">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class=form-group><label>Request path</label>
-                        <input type=text id="txtHttp_requestpath" class=form-control placeholder="Request path"> </div>
-                </div>
-
-                <div class=box-3>
-                    <div class=form-group>
-                        <div class=row>
-                            <div class=col-md-8> <label>Host IP/ Address</label>
-                                <input type=text id="txtTcp_host" class=form-control placeholder="iot.beaconyun.com">
-                            </div>
-                            <div class=col-md-4><label>Port</label>
-                                <input type=text id="txtTcp_port" class=form-control placeholder="1883">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class=form-group> <label for=defaultFormCardEmailEx class="grey-text font-weight-light">Client
-                            ID</label>
-                        <input type=text id="txtTcp_cid" class=form-control placeholder="Client ID">
-                    </div>
-                </div>
-
-                <div class=box-4>
-                    <div class=form-group>
-                        <div class=row>
-                            <div class=col-md-8><label>Host IP/ Address</label> <input type=text id="txtSocket_host"
-                                    class=form-control placeholder=iot.beaconyun.com> </div>
-                            <div class=col-md-4><label>Port</label> <input type=text id="txtSocket_port"
-                                    class=form-control placeholder=:1883> </div>
-                        </div>
-                    </div>
-
-                    <div class=form-group>
-                        <label for=defaultFormCardEmailEx class="grey-text font-weight-light">Client ID</label>
-                        <input type=text id="txtSocket_cid" class=form-control placeholder="Client ID"> </div>
-                </div>
-
 
                 <div class=form-group>
                     <div class=row>
