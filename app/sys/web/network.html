@@ -6,8 +6,8 @@
     <meta http-equiv=X-UA-Compatible content=IE=edge>
     <meta name=viewport content="width=device-width, initial-scale=1">
     <title>Main</title>
-    <link href=web/css/bootstrap.min.css rel=stylesheet>
-    <link href=web/css/pixie-main.css rel=stylesheet>
+    <link href=../web/css/bootstrap.min.css rel=stylesheet>
+    <link href=../web/css/pixie-main.css rel=stylesheet>
 </head>
 
 <body>
@@ -15,19 +15,19 @@
         <ul class="nav nav-pills">
             <li>
                 <a data-toggle=pill href=status>
-                    <img src=web/images/status.png alt>System</a>
+                    <img src=../web/images/status.png alt>System</a>
             </li>
             <li class=active>
                 <a data-toggle=pill href=network>
-                    <img src=web/images/network.png alt>Network</a>
+                    <img src=../web/images/network.png alt>Network</a>
             </li>
             <li id="liService">
                 <a data-toggle=pill href=service>
-                    <img src=web/images/service.png alt>Properties</a>
+                    <img src=../web/images/service.png alt>Properties</a>
             </li>
             <li>
                 <a data-toggle=pill href=other>
-                    <img src=web/images/other.png alt>Reset</a>
+                    <img src=../web/images/other.png alt>Reset</a>
             </li>
         </ul>
         <div class=tab-content>
@@ -38,7 +38,7 @@
                         <div id=collapse1 class="panel-heading">
                             <div class=panel-body>
                                 <div class=form-group>
-                                    <label>Nearby WLAN</label>
+                                    <label>Customer AP</label>
                                     <select class="mdb-select form-control" id="drpWLAN" placeholder="scan for wifi">
                                         <option value=1 placeholder="scan for wifi" ></option>
 
@@ -48,14 +48,14 @@
                                     <label for=defaultFormCardEmailEx
                                         class="grey-text font-weight-light">Password</label>
                                     <input type=password id="wifi_pass" class=form-control placeholder=Password> 
-                                      <input type="checkbox" onclick="router_pass_function()">Show Password
+                                      <input type="checkbox" onclick="router_pass_function()"> show password
 
                                 </div>
 
                                 <div class=text-center>
                                     <button class="btn btn-block" type="button" id="scan_wifi" title=scan>Scan
                                         Wi-fi</button>
-                                </div>
+                                </div></BR>
                                 <div class=form-group>
         
                                 </div>
