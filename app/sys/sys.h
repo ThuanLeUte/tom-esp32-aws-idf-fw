@@ -37,12 +37,12 @@
  */
 typedef enum
 {
-  SYS_STATE_POWER_ON,
-  SYS_STATE_NW_SETUP,
-  SYS_STATE_READY,
-  SYS_STATE_FACTORY_RESET,
-  SYS_STATE_CNT
-}
+  SYS_STATE_POWER_ON,   // just powered on , not thru setup
+  SYS_STATE_NW_SETUP,     // Flashed but un-provisioned.
+  SYS_STATE_READY,      // provisioned and configured, sending data
+  SYS_STATE_FACTORY_RESET,  //unused
+  SYS_STATE_CNT             // unused
+    }
 sys_fsm_state_t;
 
 /**

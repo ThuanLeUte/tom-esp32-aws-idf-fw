@@ -12,5 +12,6 @@
         "jsmn.h": "c",
         "sys_wifi.h": "c",
         "sys_devcfg.h": "c"
-    }
+    },
+    "cmake.sourceDirectory": "${workspaceFolder}/app"
 }
