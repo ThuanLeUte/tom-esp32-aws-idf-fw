@@ -136,7 +136,7 @@ void sys_run(void)
     bsp_delay_ms(5000);
 
     aws_noti_dev_data_t device_data;
-    sprintf(device_data.serial_number, "1812454ABC" ); 
+    sprintf(device_data.serial_number, g_nvs_setting_data.dev.qr_code ); 
     
     /* active devices 
     ESP32C3_B2A6  -  serial # "141A14191A18"
