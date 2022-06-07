@@ -229,6 +229,10 @@ static esp_err_t m_wifi_event_handler(void *ctx, system_event_t *event)
     // Wifi manager save ssid and password
     if (strlen((char *) m_mgr.wifi.config.sta.ssid) != 0)
     {
+      strcpy(g_nvs_setting_data.wifi.uiid, (const char *)m_mgr.wifi.config.sta.ssid);
+      strcpy(g_nvs_setting_data.wifi.pwd,  (const char *)m_mgr.wifi.config.sta.password);
+      SYS_NVS_STORE(wifi);
+
       ESP_LOGW(TAG, "Save wifi ssid     : %s", m_mgr.wifi.config.sta.ssid);
       ESP_LOGW(TAG, "Save wifi password : %s", m_mgr.wifi.config.sta.password);
       wifi_ssid_manager_save(g_ssid_manager, (char *)m_mgr.wifi.config.sta.ssid,
