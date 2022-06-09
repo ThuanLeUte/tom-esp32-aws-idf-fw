@@ -17,6 +17,7 @@
 #include "sys_aws_provision.h"
 #include "sys_devcfg.h"
 #include "sys_ota.h"
+#include "bsp.h"
 
 #include "platform_common.h"
 #include "aws_iot_config.h"
@@ -206,6 +207,10 @@ static void m_sys_aws_task(void *params)
         }
       }
     }
+    else
+    {
+      bsp_delay_ms(1000);
+    }
   }
 }
 
@@ -244,6 +249,9 @@ static bool m_sys_aws_connect(void)
   // Connecting to AWS
   ESP_LOGI(TAG, "Shadow connect...");
   CHECK(SUCCESS == aws_iot_shadow_connect(&g_sys_aws.client, &shadow_connect_params), false);
+
+  // Enable auto reconnect
+  CHECK(SUCCESS == aws_iot_mqtt_autoreconnect_set_status(&g_sys_aws.client, true), false);
 
   return true;
 }
