@@ -12,6 +12,7 @@
 
 /* Includes ----------------------------------------------------------- */
 #include "sys.h"
+#include "sys_variant.h"
 #include "sys_wifi.h"
 #include "sys_aws_provision.h"
 #include "sys_nvs.h"
@@ -24,7 +25,7 @@
 /* Private defines ---------------------------------------------------- */
 static const char *TAG = "sys";
 
-#define __CONFIG_SOFT_AP_MODE   (1)
+
 
 /* Private enumerate/structure ---------------------------------------- */
 /* Private macros ----------------------------------------------------- */
