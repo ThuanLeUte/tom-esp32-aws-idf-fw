@@ -24,6 +24,8 @@
 /* Private defines ---------------------------------------------------- */
 static const char *TAG = "sys";
 
+#define __CONFIG_SOFT_AP_MODE   (1)
+
 /* Private enumerate/structure ---------------------------------------- */
 /* Private macros ----------------------------------------------------- */
 /* Public variables --------------------------------------------------- */
@@ -54,6 +56,7 @@ void sys_boot(void)
     if (g_nvs_setting_data.wifi.mode == SYS_WIFI_MODE_STA)
     {
 __LBL_WEBPAGE_SETUP_:
+#if (__CONFIG_SOFT_AP_MODE)
       // Enter WiFi setup by Web server.
       sys_wifi_softap_init();
       sys_http_server_start();
@@ -63,12 +66,19 @@ __LBL_WEBPAGE_SETUP_:
       SYS_NVS_STORE(wifi);
 
       FSM_UPDATE_STATE(SYS_STATE_NW_SETUP);
+#else
+      goto __LBL_WIFI_SETUP_;
+#endif // __CONFIG_SOFT_AP_MODE
     }
     else
     {
       // Check WiFi setup in the STA mode
       if ((strlen((char *)g_nvs_setting_data.wifi.pwd) != 0) && (strlen((char *)g_nvs_setting_data.wifi.uiid) != 0))
       {
+#if (!__CONFIG_SOFT_AP_MODE)
+__LBL_WIFI_SETUP_:
+#endif // __CONFIG_SOFT_AP_MODE
+
         // Save current WiFi mode.
         g_nvs_setting_data.wifi.mode = SYS_WIFI_MODE_STA;
         SYS_NVS_STORE(wifi);
@@ -136,7 +146,7 @@ void sys_run(void)
     bsp_delay_ms(5000);
 
     aws_noti_dev_data_t device_data;
-    sprintf(device_data.serial_number, g_nvs_setting_data.dev.qr_code ); 
+    sprintf(device_data.serial_number, "1812454ABC" ); 
     
     /* active devices 
     ESP32C3_B2A6  -  serial # "141A14191A18"
