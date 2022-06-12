@@ -34,12 +34,12 @@ static uint8_t station_cnt = 0;
 /* Private defines ---------------------------------------------------------- */
 static const char *TAG = "sys_wifi";
 
-#define ESP_WIFI_SSID                   "Lox-Device"
+#define ESP_WIFI_SSID                   "Lox-Device-"
 #define ESP_WIFI_PASS                   "123456789"
 #define ESP_WIFI_CHANNEL                (1)
 #define MAX_STA_CONN                    (1)
-#define SOFT_ACCESS_POINT_WAIT_TIME     (2 * 60 * 1000) // 2 minutes
-// #define SOFT_ACCESS_POINT_WAIT_TIME     (30 * 1000) // 2 minutes
+#define SOFT_ACCESS_POINT_WAIT_TIME     (30 * ONE_SECOND) 
+#define BLE_ACCESS_POINT_WAIT_TIME     (30 * ONE_SECOND) 
 
 /* Private variables -------------------------------------------------------- */
 /* Private function prototypes ---------------------------------------------- */
@@ -48,6 +48,7 @@ static void m_wifi_softap_device_handler(void *arg, esp_event_base_t event_base,
                                          int32_t event_id, void *event_data);
 static bool m_sys_wifi_connect(void);
 static void m_sys_wifi_softap_expired_callback(void);
+static char soft_WAP_name[32];
 
 /* Function definitions ----------------------------------------------------- */
 void sys_wifi_init(void)
@@ -83,15 +84,20 @@ void sys_wifi_softap_init(void)
                                                       NULL,
                                                       NULL));
 
-  wifi_config_t wifi_config = {
-      .ap = {
-          .ssid           = ESP_WIFI_SSID,
-          .ssid_len       = strlen(ESP_WIFI_SSID),
-          .channel        = ESP_WIFI_CHANNEL,
-          .password       = ESP_WIFI_PASS,
-          .max_connection = MAX_STA_CONN,
-          .authmode       = WIFI_AUTH_WPA_WPA2_PSK},
-  };
+    // we should broadcast this soft AP by serial # if available. otherwise MAC ID
+    sprintf(soft_WAP_name, "%s%s", ESP_WIFI_SSID, g_nvs_setting_data.dev.qr_code);
+    ESP_LOGI(TAG, "softAP AP will be broadcast as : %s", soft_WAP_name);
+
+    wifi_config_t wifi_config = {
+        .ap = {
+            // .ssid           = soft_WAP_name,
+            .ssid_len       = strlen(soft_WAP_name),
+            .channel        = ESP_WIFI_CHANNEL,
+            .password       = ESP_WIFI_PASS,
+            .max_connection = MAX_STA_CONN,
+            .authmode       = WIFI_AUTH_WPA_WPA2_PSK},
+    };
+    memcpy(wifi_config.ap.ssid, soft_WAP_name,  strlen(soft_WAP_name));
 
   if (strlen(ESP_WIFI_PASS) == 0)
     wifi_config.ap.authmode = WIFI_AUTH_OPEN;
@@ -105,7 +111,6 @@ void sys_wifi_softap_init(void)
   bsp_tmr_auto_start(&m_wifi_softap_atm, SOFT_ACCESS_POINT_WAIT_TIME);
 
   ESP_LOGI(TAG, "Wifi_init_softap finished. SSID:%s Password:%s", ESP_WIFI_SSID, ESP_WIFI_PASS);
-
   ESP_LOGI(TAG, "Device IP: 192.168.4.1");
 }
 

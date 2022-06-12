@@ -19,11 +19,6 @@
 #include "bsp.h"
 
 /* Private defines ---------------------------------------------------- */
-#define ONE_MS_SECOND         (1)
-#define ONE_SECOND            (1000 * ONE_MS_SECOND)
-#define ONE_MINUTE            (60 * ONE_SECOND)
-#define ONE_HOUR              (60 * ONE_MINUTE)
-#define NTP_SYNC_INTEVAL_MS   (ONE_HOUR)
 
 /* Private enumerate/structure ---------------------------------------- */
 /*
