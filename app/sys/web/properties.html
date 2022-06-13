@@ -1,0 +1,158 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset=utf-8>
+    <meta http-equiv=X-UA-Compatible content=IE=edge>
+    <meta name=viewport content="width=device-width, initial-scale=1">
+    <title>Main</title>
+    <link href=web/css/bootstrap.min.css rel=stylesheet>
+    <link href=web/css/pixie-main.css rel=stylesheet>
+</head>
+
+<body>
+    <div class=main-box>
+        <ul class="nav nav-pills">
+            <li>
+                <a data-toggle=pill href=system>
+                    <img src=web/images/status.png alt>System</a>
+            </li>
+            <li>
+                <a data-toggle=pill href=ap>
+                    <img src=web/images/network.png alt>Customer AP</a>
+            </li >
+            <li id="liService" class=active>
+                <a data-toggle=pill href=properties>
+                    <img src=web/images/service.png alt>Properties</a>
+            </li>
+            <li>
+                <a data-toggle=pill href=reboot>
+                    <img src=web/images/other.png alt>Reboot</a>
+            </li>
+        </ul>
+        <div class=tab-content>
+            <table class=table>
+                <tbody>
+                    <tr>
+                        <td class=border-none>HW Version:</td>
+                        <td class=text-right id="hw_ver_id"></td>
+                    </tr>
+                    <tr>
+                        <td class=border-none>SW Version :</td>
+                        <td class=text-right id="fw_ver_id"></td>
+                    </tr>
+                </tbody>
+            </table>
+
+                <div id="service" class="tab-pane fade in active">
+                    <div class="form-group"></div>
+                    <div class="box-1">
+                        <div class="form-group"></div>
+                    </br>
+
+                    <div class="form-group">
+                        <label for="defaultFormCardEmailEx" class="grey-text font-weight-light">Sleep Duration (mins)</label>
+                        <input type="text" id="sleep_duration" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="defaultFormCardEmailEx" class="grey-text font-weight-light">Tranmit Delay (mins)</label>
+                        <input type="text" id="transmit_delay" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="defaultFormCardEmailEx" class="grey-text font-weight-light">Offline Counts</label>
+                        <input type="text" id="offline_cnt" class="form-control">
+                    </div>
+                    <div class=form-group>
+                        <label for=defaultFormCardEmailEx class="grey-text font-weight-light">Tare Values</label>
+                        <input type=text id="tare_value" class=form-control>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="text-center">
+                                <button class="btn btn-block" type="button" id="service_btn" title="Apply"
+                                onclick="btn_properties_apply()">Apply</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </body>
+</html></div><script src="web/js/jquery.min.js"></script><script src="web/js/bootstrap.min.js"></script><script src="web/js/pixie-custom.js"></script><script type="text/javascript">
+    
+    var xhttp = new XMLHttpRequest();
+
+    function btn_properties_apply() {
+
+        xhttp.open("POST", "/button_handler", true);
+
+        var setup_obj = new Object();
+
+        var sleep_duration = document.getElementById("sleep_duration").value;
+        var transmit_delay = document.getElementById("transmit_delay").value;
+        var offline_cnt    = document.getElementById("offline_cnt").value;
+        var tare_value     = document.getElementById("tare_value").value;
+
+        setup_obj.operation      = "properties_apply";
+        setup_obj.sleep_duration = sleep_duration;
+        setup_obj.transmit_delay = transmit_delay;
+        setup_obj.offline_cnt    = offline_cnt;
+        setup_obj.tare_value     = tare_value;
+
+        if (isNaN(sleep_duration) || isNaN(transmit_delay) || isNaN(offline_cnt) || isNaN(tare_value)) {
+            alert("Value is not a number");
+        }
+        else {
+            // Convert object to json string
+            var string = JSON.stringify(setup_obj);
+            
+            xhttp.send(string);
+        }
+    }
+
+    var is_data_set = false;
+    xhttp.onreadystatechange = function() {
+            const obj = JSON.parse(this.responseText);
+            var type   = obj.type;
+
+            if ((type == "properties") && (is_data_set == false))
+            {
+                is_data_set = true;
+                document.getElementById("hw_ver_id").innerText = obj.hw_ver_id;
+                document.getElementById("fw_ver_id").innerText = obj.fw_ver_id;
+                
+                var sleep_duration = document.getElementById("sleep_duration").value;
+                var transmit_delay = document.getElementById("transmit_delay").value;
+                var offline_cnt    = document.getElementById("offline_cnt").value;
+                var tare_value     = document.getElementById("tare_value").value;
+
+                if (sleep_duration.length == 0) {
+                    document.getElementById("sleep_duration").value = String(obj.sleep_duration);
+                }
+
+                if (transmit_delay.length == 0) {
+                    document.getElementById("transmit_delay").value = String(obj.transmit_duration);
+                }
+
+                if (offline_cnt.length == 0) {
+                    document.getElementById("offline_cnt").value = String(obj.offline_cnt);
+                }
+                
+                if (tare_value.length == 0) {
+                    document.getElementById("tare_value").value = String(obj.tare_value);
+                }
+            }
+        }
+
+    setInterval( function() {
+        xhttp.open("GET", "/esp32_properties", true);
+        xhttp.send();
+    }, 1000);
+
+</script></body></html>

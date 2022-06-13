@@ -25,6 +25,7 @@
 #include "frozen.h"
 #include "sys_nvs.h"
 #include "sys_devcfg.h"
+#include "bsp.h"
 
 /* Private enum/structs ----------------------------------------------------- */
 /* Private defines ---------------------------------------------------------- */
@@ -33,14 +34,14 @@ static const char *TAG = "sys_http_server";
 /* Private Constants -------------------------------------------------------- */
 static const char file_login_html_start[]        asm("_binary_login_html_start");
 static const char file_login_html_end[]          asm("_binary_login_html_end");
-static const char file_status_html_start[]       asm("_binary_status_html_start");
-static const char file_status_html_end[]         asm("_binary_status_html_end");
-static const char file_service_html_start[]      asm("_binary_service_html_start");
-static const char file_service_html_end[]        asm("_binary_service_html_end");
-static const char file_network_html_start[]      asm("_binary_network_html_start");
-static const char file_network_html_end[]        asm("_binary_network_html_end");
-static const char file_other_html_start[]        asm("_binary_other_html_start");
-static const char file_other_html_end[]          asm("_binary_other_html_end");
+static const char file_system_html_start[]       asm("_binary_system_html_start");
+static const char file_system_html_end[]         asm("_binary_system_html_end");
+static const char file_properties_html_start[]   asm("_binary_properties_html_start");
+static const char file_properties_html_end[]     asm("_binary_properties_html_end");
+static const char file_ap_html_start[]           asm("_binary_ap_html_start");
+static const char file_ap_html_end[]             asm("_binary_ap_html_end");
+static const char file_reboot_html_start[]       asm("_binary_reboot_html_start");
+static const char file_reboot_html_end[]         asm("_binary_reboot_html_end");
 
 static const char file_bootstrap_min_css_start[] asm("_binary_bootstrap_min_css_start");
 static const char file_bootstrap_min_css_end[]   asm("_binary_bootstrap_min_css_end");
@@ -68,8 +69,8 @@ static const char file_peripheral_img_start[]    asm("_binary_periperal_png_star
 static const char file_peripheral_img_end[]      asm("_binary_periperal_png_end");
 static const char file_reboot_img_start[]        asm("_binary_reboot_png_start");
 static const char file_reboot_img_end[]          asm("_binary_reboot_png_end");
-static const char file_service_img_start[]       asm("_binary_service_png_start");
-static const char file_service_img_end[]         asm("_binary_service_png_end");
+static const char file_properties_img_start[]       asm("_binary_service_png_start");
+static const char file_properties_img_end[]         asm("_binary_service_png_end");
 static const char file_status_img_start[]        asm("_binary_status_png_start");
 static const char file_status_img_end[]          asm("_binary_status_png_end");
 static const char file_timezone_img_start[]      asm("_binary_timezone_png_start");
@@ -88,6 +89,10 @@ static esp_err_t web_other_html_handler(httpd_req_t *req);
 static esp_err_t web_network_html_handler(httpd_req_t *req);
 
 static esp_err_t web_button_config_handler(httpd_req_t *req);
+static esp_err_t web_esp32_data_handler(httpd_req_t *req);
+static esp_err_t web_esp32_wifi_handler(httpd_req_t *req);
+static esp_err_t web_esp32_wifi_list_handler(httpd_req_t *req);
+static esp_err_t web_esp32_device_properties_handler(httpd_req_t *req);
 
 static esp_err_t web_bootstrap_min_css_handler(httpd_req_t *req);
 static esp_err_t web_pixie_main_css_handler(httpd_req_t *req);
@@ -108,8 +113,12 @@ static esp_err_t web_status_img_handler(httpd_req_t *req);
 static esp_err_t web_timezone_img_handler(httpd_req_t *req);
 static esp_err_t web_upgrade_img_handler(httpd_req_t *req);
 
+static bool sys_http_server_handle_data(char *buf, int buf_len);
+
 /* Private variables -------------------------------------------------------- */
 static httpd_handle_t m_server = NULL;
+static char *sta_ssid = NULL;
+static char *sta_password = NULL;
 
 static const httpd_uri_t web_login = 
 {
@@ -121,7 +130,7 @@ static const httpd_uri_t web_login =
 
 static const httpd_uri_t web_status = 
 {
-    .uri      = "/status",
+    .uri      = "/system",
     .method   = HTTP_GET,
     .handler  = web_status_html_handler,
     .user_ctx = NULL
@@ -129,7 +138,7 @@ static const httpd_uri_t web_status =
 
 static const httpd_uri_t web_network = 
 {
-    .uri      = "/network",
+    .uri      = "/ap",
     .method   = HTTP_GET,
     .handler  = web_network_html_handler,
     .user_ctx = NULL
@@ -137,14 +146,14 @@ static const httpd_uri_t web_network =
 
 static const httpd_uri_t web_service = 
 {
-    .uri      = "/service",
+    .uri      = "/properties",
     .method   = HTTP_GET,
     .handler  = web_service_html_handler,
     .user_ctx = NULL
 };
 static const httpd_uri_t web_other = 
 {
-    .uri      = "/other",
+    .uri      = "/reboot",
     .method   = HTTP_GET,
     .handler  = web_other_html_handler,
     .user_ctx = NULL
@@ -152,9 +161,41 @@ static const httpd_uri_t web_other =
 
 static const httpd_uri_t web_button_config = 
 {
-    .uri      = "/button_config",
+    .uri      = "/button_handler",
     .method   = HTTP_POST,
     .handler  = web_button_config_handler,
+    .user_ctx = NULL
+};
+
+static const httpd_uri_t web_esp32_data = 
+{
+    .uri      = "/esp32_data",
+    .method   = HTTP_GET,
+    .handler  = web_esp32_data_handler,
+    .user_ctx = NULL
+};
+
+static const httpd_uri_t web_esp32_wifi_status = 
+{
+    .uri      = "/esp32_wifi_status",
+    .method   = HTTP_GET,
+    .handler  = web_esp32_wifi_handler,
+    .user_ctx = NULL
+};
+
+static const httpd_uri_t web_esp32_wifi_list = 
+{
+    .uri      = "/esp32_wifi_list",
+    .method   = HTTP_GET,
+    .handler  = web_esp32_wifi_list_handler,
+    .user_ctx = NULL
+};
+
+static const httpd_uri_t web_esp32_device_properties = 
+{
+    .uri      = "/esp32_properties",
+    .method   = HTTP_GET,
+    .handler  = web_esp32_device_properties_handler,
     .user_ctx = NULL
 };
 
@@ -322,28 +363,97 @@ static esp_err_t web_login_html_handler(httpd_req_t *req)
 static esp_err_t web_status_html_handler(httpd_req_t *req)
 {
   httpd_resp_set_type(req, "text/html");
-  httpd_resp_send(req, file_status_html_start, file_status_html_end - file_status_html_start);
+  httpd_resp_send(req, file_system_html_start, file_system_html_end - file_system_html_start);
+  return ESP_OK;
+}
+
+static esp_err_t web_esp32_data_handler(httpd_req_t *req)
+{
+  char buf[300];
+
+  struct json_out out = JSON_OUT_BUF(buf, sizeof(buf));
+
+  json_printf(&out, "{type: system, mac: %Q, ap_ip: %Q, wifi_network: %Q, station_ip: %Q, active_service: %Q}",
+              g_nvs_setting_data.mac_device_addr,
+              "192.168.4.1",
+              g_nvs_setting_data.soft_ap.ssid,
+              "192.168.4.2",
+              "WiFi");
+
+  httpd_resp_send(req, buf, strlen(buf));
+  return ESP_OK;
+}
+
+static esp_err_t web_esp32_wifi_handler(httpd_req_t *req)
+{
+  char buf_wifi[100];
+
+  struct json_out out = JSON_OUT_BUF(buf_wifi, sizeof(buf_wifi));
+
+  json_printf(&out, "{type: wifi_status, status: %d}",
+              sys_wifi_is_connected());
+  
+  // Check and save WiFi information
+  if (sys_wifi_is_connected())
+  {
+    SYS_NVS_STORE(wifi);
+    wifi_ssid_manager_save(g_ssid_manager, (char *)sta_ssid, (char *)sta_password);
+  }
+
+  httpd_resp_send(req, buf_wifi, strlen(buf_wifi));
+  return ESP_OK;
+}
+
+static esp_err_t web_esp32_wifi_list_handler(httpd_req_t *req)
+{
+  static char buf_list[2000];
+
+  if (sys_wifi_is_scan_done())
+  {
+    sys_wifi_get_scan_wifi_list(buf_list, sizeof(buf_list));
+    sys_wifi_set_wifi_scan_status(false);
+  }
+
+  httpd_resp_send(req, buf_list, strlen(buf_list));
+  return ESP_OK;
+}
+
+static esp_err_t web_esp32_device_properties_handler(httpd_req_t *req)
+{
+  char buf[200];
+
+  struct json_out out = JSON_OUT_BUF(buf, sizeof(buf));
+
+  json_printf(&out, "{type: properties, hw_ver_id: %Q, fw_ver_id: %Q, sleep_duration: %d, transmit_duration: %d, offline_cnt: %d, tare_value: %d}",
+              DEVICE_FIRMWARE_VERSION,
+              DEVICE_HARDWARE_VERSION,
+              g_nvs_setting_data.properties.sleep_duration,
+              g_nvs_setting_data.properties.transmit_delay,
+              g_nvs_setting_data.properties.offline_cnt,
+              g_nvs_setting_data.properties.scale_tare);
+
+  httpd_resp_send(req, buf, strlen(buf));
   return ESP_OK;
 }
 
 static esp_err_t web_service_html_handler(httpd_req_t *req)
 {
   httpd_resp_set_type(req, "text/html");
-  httpd_resp_send(req, file_service_html_start, file_service_html_end - file_service_html_start);
+  httpd_resp_send(req, file_properties_html_start, file_properties_html_end - file_properties_html_start);
   return ESP_OK;
 }
 
 static esp_err_t web_other_html_handler(httpd_req_t *req)
 {
   httpd_resp_set_type(req, "text/html");
-  httpd_resp_send(req, file_other_html_start, file_other_html_end - file_other_html_start);
+  httpd_resp_send(req, file_reboot_html_start, file_reboot_html_end - file_reboot_html_start);
   return ESP_OK;
 }
 
 static esp_err_t web_network_html_handler(httpd_req_t *req)
 {
   httpd_resp_set_type(req, "text/html");
-  httpd_resp_send(req, file_network_html_start, file_network_html_end - file_network_html_start);
+  httpd_resp_send(req, file_ap_html_start, file_ap_html_end - file_ap_html_start);
   return ESP_OK;
 }
 
@@ -420,7 +530,7 @@ static esp_err_t web_reboot_img_handler(httpd_req_t *req)
 static esp_err_t web_service_img_handler(httpd_req_t *req)
 {
   httpd_resp_set_type(req, "image/png");
-  httpd_resp_send(req, file_service_img_start, file_service_img_end - file_service_img_start);
+  httpd_resp_send(req, file_properties_img_start, file_properties_img_end - file_properties_img_start);
   return ESP_OK;
 }
 
@@ -450,9 +560,6 @@ static esp_err_t web_button_config_handler(httpd_req_t *req)
   char buf[500];
   int ret = 0;
   int remaining = req->content_len;
-  char *result_ssid= NULL;
-  char *result_pwd = NULL;
-  char *result_device_id = NULL;
 
   memset(buf, 0, 500);
 
@@ -478,43 +585,16 @@ static esp_err_t web_button_config_handler(httpd_req_t *req)
   // Log data received
   ESP_LOGI(TAG, "%.*s", ret, buf);
 
-  uint8_t res = json_scanf((const char *)buf, (int)sizeof(buf),
-                   "{ssid: %Q,password: %Q,device_id: %Q}",
-                   &result_ssid, &result_pwd, &result_device_id);
-
-  if (0 == res)
+  if (!sys_http_server_handle_data(buf, sizeof(buf)))
   {
-    ESP_LOGW(TAG, "Json parsing fail!");
-    return ESP_OK;
+    ESP_LOGE(TAG, "Parsing data failed");
+    return ESP_FAIL;
   }
 
-  ESP_LOGI(TAG, "Json parse success!");
-  ESP_LOGI(TAG, "SSID: %s", result_ssid);
-  ESP_LOGI(TAG, "Password: %s", result_pwd);
-  ESP_LOGI(TAG, "Device ID: %s", result_device_id);
-
-  strcpy(g_nvs_setting_data.wifi.uiid, result_ssid);
-  strcpy(g_nvs_setting_data.wifi.pwd, result_pwd);
-  strcpy(g_nvs_setting_data.dev.qr_code, result_device_id);
-
-  if (FLAG_QRCODE_SET_SUCCESS != g_nvs_setting_data.dev.qr_code_flag)
-  {
-    g_nvs_setting_data.dev.qr_code_flag = FLAG_QRCODE_SET;
-  }
-
-  ESP_LOGI(TAG, "SSID after: %s", g_nvs_setting_data.wifi.uiid);
-  ESP_LOGI(TAG, "Password after: %s", g_nvs_setting_data.wifi.pwd);
-  ESP_LOGI(TAG, "Deivie ID after: %s", g_nvs_setting_data.dev.qr_code);
+  ESP_LOGI(TAG, "Parsing data success");
 
   // End response
   httpd_resp_send_chunk(req, NULL, 0);
-
-  if ((strlen(g_nvs_setting_data.wifi.uiid) != 0) && (strlen(g_nvs_setting_data.wifi.pwd) != 0))
-  {
-    SYS_NVS_STORE(wifi);
-    SYS_NVS_STORE(dev);
-    esp_restart();
-  }
 
   return ESP_OK;
 }
@@ -538,6 +618,10 @@ static httpd_handle_t start_webserver(void)
     httpd_register_uri_handler(m_server, &web_other);
 
     httpd_register_uri_handler(m_server, &web_button_config);
+    httpd_register_uri_handler(m_server, &web_esp32_data);
+    httpd_register_uri_handler(m_server, &web_esp32_wifi_status);
+    httpd_register_uri_handler(m_server, &web_esp32_wifi_list);
+    httpd_register_uri_handler(m_server, &web_esp32_device_properties);
 
     httpd_register_uri_handler(m_server, &web_bootstrap_min_css);
     httpd_register_uri_handler(m_server, &web_pixie_main_css);
@@ -563,6 +647,92 @@ static httpd_handle_t start_webserver(void)
 
   ESP_LOGI(TAG, "Error starting server!");
   return NULL;
+}
+
+static bool sys_http_server_handle_data(char *buf, int buf_len)
+{
+  uint8_t res;
+  char *operation      = NULL;
+  char *app_ssid       = NULL;
+  char *app_password   = NULL;
+
+  char *sleep_duration = NULL;
+  char *transmit_delay = NULL;
+  char *offline_cnt    = NULL;
+  char *tare_value     = NULL;
+
+  res = json_scanf((const char *)buf, (int)buf_len,
+                   "{operation: %Q}",
+                   &operation);
+
+  ESP_LOGI(TAG, "Operation: %s", operation);
+
+  if (strcmp("system", operation) == 0)
+  {
+    res = json_scanf((const char *)buf, (int)buf_len,
+                     "{operation: %Q, ap_ssid: %Q, ap_password: %Q}",
+                     &operation, &app_ssid, &app_password);
+
+    sprintf(g_nvs_setting_data.soft_ap.ssid, "%s", app_ssid);
+    sprintf(g_nvs_setting_data.soft_ap.pwd, "%s", app_password);
+    
+    ESP_LOGI(TAG, "SSID:%s Password:%s", g_nvs_setting_data.soft_ap.ssid, g_nvs_setting_data.soft_ap.pwd);
+
+    if ((strlen(g_nvs_setting_data.soft_ap.pwd) >= 8) && (strlen(g_nvs_setting_data.soft_ap.ssid) > 0))
+    {
+      ESP_LOGI(TAG, "Store to NVS SAP");
+      SYS_NVS_STORE(soft_ap);
+    }
+    else
+    {
+      ESP_LOGE(TAG, "The ssid empty or password less than 8");
+    }
+  }
+  else if (strcmp("network_scan_wifi", operation) == 0)
+  {
+    sys_wifi_scan_start();
+  }
+  else if (strcmp("network_connect", operation) == 0)
+  {
+    res = json_scanf((const char *)buf, (int)buf_len,
+                     "{operation: %Q, sta_ssid: %Q, sta_password: %Q}",
+                     &operation, &sta_ssid, &sta_password);
+
+    ESP_LOGI(TAG, "Connect to SSID: %s, Password: %s", sta_ssid, sta_password);
+
+    sys_wifi_connect(sta_ssid, sta_password);
+
+    strcpy(g_nvs_setting_data.wifi.uiid, (const char *)sta_ssid);
+    strcpy(g_nvs_setting_data.wifi.pwd, (const char *)sta_password);
+  }
+  else if (strcmp("properties_apply", operation) == 0)
+  {
+    res = json_scanf((const char *)buf, (int)buf_len,
+                     "{operation: %Q, sleep_duration: %Q, transmit_delay: %Q, offline_cnt: %Q, tare_value: %Q}",
+                     &operation,
+                     &sleep_duration, &transmit_delay, &offline_cnt, &tare_value);
+
+    ESP_LOGI(TAG, "Sleep duration: %s", sleep_duration);
+    ESP_LOGI(TAG, "Transmit delay: %s", transmit_delay);
+    ESP_LOGI(TAG, "Offline count : %s", offline_cnt);
+    ESP_LOGI(TAG, "Tare vale     : %s", tare_value);
+
+    g_nvs_setting_data.properties.sleep_duration = atoi(sleep_duration);
+    g_nvs_setting_data.properties.transmit_delay = atoi(transmit_delay);
+    g_nvs_setting_data.properties.offline_cnt    = atoi(offline_cnt);
+    g_nvs_setting_data.properties.scale_tare     = atoi(tare_value);
+
+    SYS_NVS_STORE(properties);
+  }
+  else if (strcmp("reboot", operation) == 0)
+  {
+    esp_restart();
+  }
+
+  if (0 == res)
+    return false;
+
+  return true;
 }
 
 /* End of file -------------------------------------------------------------- */

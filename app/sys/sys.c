@@ -86,7 +86,7 @@ __LBL_WIFI_SETUP_:
 
         sys_wifi_sta_init();
         sys_wifi_config_set(g_nvs_setting_data.wifi.uiid, g_nvs_setting_data.wifi.pwd);
-        sys_wifi_connect();
+        sys_wifi_sta_start();
 
         // Check OTA enable or not
         if (g_nvs_setting_data.ota.enable)
@@ -115,7 +115,7 @@ __LBL_WIFI_SETUP_:
       g_nvs_setting_data.wifi.mode = SYS_WIFI_MODE_AP;
       SYS_NVS_STORE(wifi);
 
-      sys_wifi_connect();
+      sys_wifi_sta_start();
       FSM_UPDATE_STATE(SYS_STATE_READY);
     }
   }

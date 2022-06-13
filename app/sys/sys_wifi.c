@@ -16,16 +16,20 @@
 #include "sys_devcfg.h"
 #include "sys_time.h"
 #include "bsp_timer.h"
+#include "frozen.h"
 
 /* Private enum/structs ----------------------------------------------------- */
 static struct
 {
   wifi_config_t config;
   bool is_connected;
+  bool is_softap_mode;
+  bool is_scan_done;
 
 } m_wifi =
 {
   .is_connected = false,
+  .is_scan_done = false,
 };
 
 static auto_timer_t m_wifi_softap_atm;
@@ -34,20 +38,16 @@ static uint8_t station_cnt = 0;
 /* Private defines ---------------------------------------------------------- */
 static const char *TAG = "sys_wifi";
 
-#define ESP_WIFI_SSID                   "Lox-Device"
-#define ESP_WIFI_PASS                   "123456789"
 #define ESP_WIFI_CHANNEL                (1)
-#define MAX_STA_CONN                    (1)
+#define MAX_STA_CONN                    (10)
 #define SOFT_ACCESS_POINT_WAIT_TIME     (2 * 60 * 1000) // 2 minutes
-// #define SOFT_ACCESS_POINT_WAIT_TIME     (30 * 1000) // 2 minutes
 
 /* Private variables -------------------------------------------------------- */
 /* Private function prototypes ---------------------------------------------- */
 static esp_err_t m_sys_wifi_event_handler(void *ctx, system_event_t *event);
 static void m_wifi_softap_device_handler(void *arg, esp_event_base_t event_base,
                                          int32_t event_id, void *event_data);
-static bool m_sys_wifi_connect(void);
-static void m_sys_wifi_softap_expired_callback(void);
+static void m_sys_wifi_softap_expired_callback(void *para);
 
 /* Function definitions ----------------------------------------------------- */
 void sys_wifi_init(void)
@@ -55,22 +55,26 @@ void sys_wifi_init(void)
   // Init TCP/IP stack
   ESP_ERROR_CHECK(esp_netif_init());
   ESP_ERROR_CHECK(esp_event_loop_create_default());
-}
-
-void sys_wifi_sta_init(void)
-{
-  esp_netif_create_default_wifi_sta();
-
-  // Init ESP WiFi
-  wifi_init_config_t wifi_init_cfg = WIFI_INIT_CONFIG_DEFAULT();
-  ESP_ERROR_CHECK(esp_wifi_init(&wifi_init_cfg));
 
   // Wifi ssid manager create
   g_ssid_manager = wifi_ssid_manager_create(WIFI_MAX_STATION_NUM);
 }
 
+void sys_wifi_sta_init(void)
+{
+  m_wifi.is_softap_mode = false;
+
+  esp_netif_create_default_wifi_sta();
+
+  // Init ESP WiFi
+  wifi_init_config_t wifi_init_cfg = WIFI_INIT_CONFIG_DEFAULT();
+  ESP_ERROR_CHECK(esp_wifi_init(&wifi_init_cfg));
+}
+
 void sys_wifi_softap_init(void)
 {
+  m_wifi.is_softap_mode = true;
+
   esp_netif_create_default_wifi_ap();
 
   // Init ESP WiFi
@@ -85,18 +89,18 @@ void sys_wifi_softap_init(void)
 
   wifi_config_t wifi_config = {
       .ap = {
-          .ssid           = ESP_WIFI_SSID,
-          .ssid_len       = strlen(ESP_WIFI_SSID),
+          .ssid_len       = strlen(g_nvs_setting_data.soft_ap.ssid),
           .channel        = ESP_WIFI_CHANNEL,
-          .password       = ESP_WIFI_PASS,
           .max_connection = MAX_STA_CONN,
           .authmode       = WIFI_AUTH_WPA_WPA2_PSK},
   };
 
-  if (strlen(ESP_WIFI_PASS) == 0)
-    wifi_config.ap.authmode = WIFI_AUTH_OPEN;
+  memcpy(wifi_config.ap.ssid, g_nvs_setting_data.soft_ap.ssid, strlen(g_nvs_setting_data.soft_ap.ssid));
+  memcpy(wifi_config.ap.password, g_nvs_setting_data.soft_ap.pwd, strlen(g_nvs_setting_data.soft_ap.pwd));
 
-  ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
+  ESP_LOGI(TAG, "SSID:%s Password:%s",  wifi_config.ap.ssid, wifi_config.ap.password);
+
+  ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA));
   ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &wifi_config));
   ESP_ERROR_CHECK(esp_wifi_start());
 
@@ -104,12 +108,12 @@ void sys_wifi_softap_init(void)
   bsp_tmr_auto_init(&m_wifi_softap_atm, m_sys_wifi_softap_expired_callback);
   bsp_tmr_auto_start(&m_wifi_softap_atm, SOFT_ACCESS_POINT_WAIT_TIME);
 
-  ESP_LOGI(TAG, "Wifi_init_softap finished. SSID:%s Password:%s", ESP_WIFI_SSID, ESP_WIFI_PASS);
+  ESP_LOGI(TAG, "WiFi init finished. SSID:%s Password:%s",  wifi_config.ap.ssid, wifi_config.ap.password);
 
   ESP_LOGI(TAG, "Device IP: 192.168.4.1");
 }
 
-void sys_wifi_connect(void)
+void sys_wifi_sta_start(void)
 {
   ESP_ERROR_CHECK(esp_event_loop_init(m_sys_wifi_event_handler, NULL));
   ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
@@ -158,6 +162,74 @@ bool sys_wifi_is_configured(void)
   return true;
 }
 
+void sys_wifi_scan_start(void)
+{
+  wifi_scan_config_t scan_cfg = 
+    {
+      .ssid        = NULL,
+      .bssid       = NULL,
+      .channel     = 0,
+      .show_hidden = true,
+      .scan_type   = WIFI_SCAN_TYPE_ACTIVE
+    };
+    ESP_ERROR_CHECK(esp_wifi_scan_start(&scan_cfg, true));
+}
+
+void sys_wifi_get_scan_wifi_list(char *buf, uint16_t size)
+{
+  struct json_out out = JSON_OUT_BUF(buf, size);
+  uint16_t ap_cnt = 0;
+
+  // Get number of APs found
+  esp_wifi_scan_get_ap_num(&ap_cnt);
+  if (ap_cnt == 0)
+  {
+    ESP_LOGW(TAG, "No AP found");
+    return;
+  }
+
+  // Get AP list
+  wifi_ap_record_t *ap_list = (wifi_ap_record_t *)malloc(sizeof(wifi_ap_record_t) * ap_cnt);
+  ESP_ERROR_CHECK(esp_wifi_scan_get_ap_records(&ap_cnt, ap_list));
+
+  for (int i = 0; i < ap_cnt; ++i)
+  {
+    ESP_LOGW(TAG, "WiFi SSID: %s", ap_list[i].ssid);
+  }
+
+  ESP_LOGW(TAG, "AP cnt: %d", ap_cnt);
+
+  // json_printf(&out, "{type: wifi_list, cnt: %d}", ap_cnt);
+
+  json_printf(&out, "{type: wifi_list, cnt: %d, list: [", ap_cnt);
+
+  for (uint16_t i = 0; i < ap_cnt; i++)
+  {
+    json_printf(&out, "%Q", ap_list[i].ssid);
+
+    if (i != (ap_cnt - 1))
+      json_printf(&out, ",");
+  }
+
+  json_printf(&out, "]}");
+
+  ESP_LOGW(TAG, "WiFi list: %s", buf);
+
+  // Cleanup
+  esp_wifi_scan_stop();
+  free(ap_list);
+}
+
+bool sys_wifi_is_scan_done(void)
+{
+  return m_wifi.is_scan_done;
+}
+
+void sys_wifi_set_wifi_scan_status(bool done)
+{
+  m_wifi.is_scan_done = done;
+}
+
 /* Private function --------------------------------------------------------- */
 /**
  * @brief         Wifi connect
@@ -170,24 +242,34 @@ bool sys_wifi_is_configured(void)
  *    - true:  Get best config success
  *    - false: Get best config failed
  */
-static bool m_sys_wifi_connect(void)
+bool sys_wifi_connect(const char *ssid, const char *password)
 {
   wifi_config_t config = {0};
 
-  wifi_ssid_manager_list_show(g_ssid_manager);
-
-  if (ESP_OK == wifi_ssid_manager_get_best_config(g_ssid_manager, &config))
+  if (m_wifi.is_softap_mode == false)
   {
-    ESP_LOGW(TAG, "Selected SSID: %s (%s)", config.sta.ssid, config.sta.password);
-    esp_wifi_set_config(WIFI_IF_STA, &config);
-    esp_wifi_connect();
-    return true;
+    wifi_ssid_manager_list_show(g_ssid_manager);
+
+    if (ESP_OK == wifi_ssid_manager_get_best_config(g_ssid_manager, &config))
+    {
+__LBL_WIFI_CONNECT__:
+      ESP_LOGW(TAG, "Selected SSID: %s (%s)", config.sta.ssid, config.sta.password);
+      esp_wifi_set_config(WIFI_IF_STA, &config);
+      esp_wifi_connect();
+      return true;
+    }
+    else
+    {
+      ESP_LOGE(TAG, "Can not get the WiFi station in the WiFi save list");
+      esp_wifi_connect();
+      return false;
+    }
   }
   else
   {
-    ESP_LOGE(TAG, "Can not get the WiFi station in the WiFi save list");
-    esp_wifi_connect();
-    return false;
+    strcpy((char *)config.sta.ssid, (char *)ssid);
+    strcpy((char *)config.sta.password, (char *)password);
+    goto __LBL_WIFI_CONNECT__;
   }
 }
 
@@ -206,7 +288,7 @@ static esp_err_t m_sys_wifi_event_handler(void *ctx, system_event_t *event)
   {
   case SYSTEM_EVENT_STA_START:
   {
-    m_sys_wifi_connect();
+    sys_wifi_connect(NULL, NULL);
     break;
   }
   case SYSTEM_EVENT_STA_GOT_IP:
@@ -223,7 +305,8 @@ static esp_err_t m_sys_wifi_event_handler(void *ctx, system_event_t *event)
   {
     ESP_LOGE(TAG, "Disconnected!");
     m_wifi.is_connected = false;
-    m_sys_wifi_connect(); // WORKAROUND: as ESP32 WiFi libs don't currently auto-reassociate
+
+    sys_wifi_connect(NULL, NULL); // WORKAROUND: as ESP32 WiFi libs don't currently auto-reassociate
     break;
   }
 
@@ -237,23 +320,41 @@ static esp_err_t m_sys_wifi_event_handler(void *ctx, system_event_t *event)
 static void m_wifi_softap_device_handler(void *arg, esp_event_base_t event_base,
                                          int32_t event_id, void *event_data)
 {
-  if (event_id == WIFI_EVENT_AP_STACONNECTED)
+  wifi_event_ap_staconnected_t    *event_connected    = (wifi_event_ap_staconnected_t *)event_data;
+  wifi_event_ap_stadisconnected_t *event_disconnected = (wifi_event_ap_stadisconnected_t *)event_data;
+
+  ESP_LOGE(TAG, "event_id: %d", event_id);
+
+  switch (event_id)
   {
-    wifi_event_ap_staconnected_t *event = (wifi_event_ap_staconnected_t *)event_data;
-    ESP_LOGI(TAG, "station " MACSTR " join, AID=%d", MAC2STR(event->mac), event->aid);
+  case SYSTEM_EVENT_SCAN_DONE:
+    ESP_LOGI(TAG, "Scan done");
+    m_wifi.is_scan_done = true;
+    break;
+
+  case SYSTEM_EVENT_STA_CONNECTED:
+    ESP_LOGE(TAG, "Connected!");
+    m_wifi.is_connected = true;
+    break;
+
+  case WIFI_EVENT_AP_STACONNECTED:
+    ESP_LOGI(TAG, "station " MACSTR " join, AID=%d", MAC2STR(event_connected->mac), event_connected->aid);
 
     station_cnt++;
-  }
-  else if (event_id == WIFI_EVENT_AP_STADISCONNECTED)
-  {
-    wifi_event_ap_stadisconnected_t *event = (wifi_event_ap_stadisconnected_t *)event_data;
-    ESP_LOGI(TAG, "station " MACSTR " leave, AID=%d", MAC2STR(event->mac), event->aid);
+    break;
+
+  case WIFI_EVENT_AP_STADISCONNECTED:
+    ESP_LOGI(TAG, "station " MACSTR " leave, AID=%d", MAC2STR(event_disconnected->mac), event_disconnected->aid);
 
     station_cnt--;
+    break;
+
+  default:
+    break;
   }
 }
 
-static void m_sys_wifi_softap_expired_callback(void)
+static void m_sys_wifi_softap_expired_callback(void *para)
 {
   ESP_LOGI(TAG, "m_sys_wifi_softap_expired_callback!");
 

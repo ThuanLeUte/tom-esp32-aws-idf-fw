@@ -50,7 +50,12 @@ void sys_wifi_softap_init(void);
 /**
  * @brief         Wifi connect
  */
-void sys_wifi_connect(void);
+void sys_wifi_sta_start(void);
+
+bool sys_wifi_connect(const char *ssid, const char *password);
+bool sys_wifi_is_scan_done(void);;
+void sys_wifi_get_scan_wifi_list(char *buf, uint16_t size);
+void sys_wifi_set_wifi_scan_status(bool done);
 
 /**
  * @brief         Check that WiFi is connected or not
@@ -82,6 +87,8 @@ void sys_wifi_update_event_handler(void);
  * 
  */
 void sys_wifi_config_set(const char *ssid, const char *pwd);
+
+void sys_wifi_scan_start(void);
 
 #endif /* __SYS_WIFI_H */
 
