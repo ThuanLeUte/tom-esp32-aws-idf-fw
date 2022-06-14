@@ -675,6 +675,7 @@ static bool sys_http_server_handle_data(char *buf, int buf_len)
 
     sprintf(g_nvs_setting_data.soft_ap.ssid, "%s", app_ssid);
     sprintf(g_nvs_setting_data.soft_ap.pwd, "%s", app_password);
+    g_nvs_setting_data.soft_ap.is_change = true;
     
     ESP_LOGI(TAG, "SSID:%s Password:%s", g_nvs_setting_data.soft_ap.ssid, g_nvs_setting_data.soft_ap.pwd);
 

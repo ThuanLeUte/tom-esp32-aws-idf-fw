@@ -72,8 +72,11 @@ void sys_nvs_reset_data(void)
   
   memset(&g_nvs_setting_data.wifi, 0, sizeof(g_nvs_setting_data.wifi));
 
-  sprintf(g_nvs_setting_data.soft_ap.ssid , "%s", "Lox-Device");
-  sprintf(g_nvs_setting_data.soft_ap.pwd, "%s", "123456789");
+  g_nvs_setting_data.soft_ap.is_change = false;
+
+  sprintf(g_nvs_setting_data.soft_ap.ssid, "%s", "Lox-Device");
+  sprintf(g_nvs_setting_data.soft_ap.pwd, "%s", ESP_WIFI_PASS_DEFAULT_AP);
+
 }
 
 void sys_nvs_init(void)

@@ -21,6 +21,9 @@
 #define WIFI_CONNECT_TIMEOUT_MS         (20000)     // 20s
 #define WIFI_MAX_STATION_NUM            (100)       // Max wifi stations store in flash
 
+#define ESP_WIFI_SSID_DEFAULT_AP        "LOX_SCALE"
+#define ESP_WIFI_PASS_DEFAULT_AP        "123456789"
+
 /* Public enumerate/structure ----------------------------------------- */
 typedef enum
 {

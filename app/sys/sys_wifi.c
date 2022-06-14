@@ -40,7 +40,8 @@ static const char *TAG = "sys_wifi";
 
 #define ESP_WIFI_CHANNEL                (1)
 #define MAX_STA_CONN                    (10)
-#define SOFT_ACCESS_POINT_WAIT_TIME     (2 * 60 * 1000) // 2 minutes
+#define SOFT_ACCESS_POINT_WAIT_TIME     (30 * ONE_SECOND) 
+#define BLE_ACCESS_POINT_WAIT_TIME      (30 * ONE_SECOND) 
 
 /* Private variables -------------------------------------------------------- */
 /* Private function prototypes ---------------------------------------------- */
@@ -89,16 +90,20 @@ void sys_wifi_softap_init(void)
 
   wifi_config_t wifi_config = {
       .ap = {
-          .ssid_len       = strlen(g_nvs_setting_data.soft_ap.ssid),
           .channel        = ESP_WIFI_CHANNEL,
           .max_connection = MAX_STA_CONN,
           .authmode       = WIFI_AUTH_WPA_WPA2_PSK},
   };
 
+  if (g_nvs_setting_data.soft_ap.is_change == false)
+    sprintf(g_nvs_setting_data.soft_ap.ssid, "%s_%s", ESP_WIFI_SSID_DEFAULT_AP, g_nvs_setting_data.dev.qr_code);
+
   memcpy(wifi_config.ap.ssid, g_nvs_setting_data.soft_ap.ssid, strlen(g_nvs_setting_data.soft_ap.ssid));
   memcpy(wifi_config.ap.password, g_nvs_setting_data.soft_ap.pwd, strlen(g_nvs_setting_data.soft_ap.pwd));
+  wifi_config.ap.ssid_len = strlen(g_nvs_setting_data.soft_ap.ssid);
 
-  ESP_LOGI(TAG, "SSID:%s Password:%s",  wifi_config.ap.ssid, wifi_config.ap.password);
+  ESP_LOGI(TAG, "SoftAP will be broadcast as: %s", g_nvs_setting_data.soft_ap.ssid);
+  ESP_LOGI(TAG, "SSID: %s .Password: %s",  wifi_config.ap.ssid, wifi_config.ap.password);
 
   ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA));
   ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &wifi_config));
@@ -109,7 +114,6 @@ void sys_wifi_softap_init(void)
   bsp_tmr_auto_start(&m_wifi_softap_atm, SOFT_ACCESS_POINT_WAIT_TIME);
 
   ESP_LOGI(TAG, "WiFi init finished. SSID:%s Password:%s",  wifi_config.ap.ssid, wifi_config.ap.password);
-
   ESP_LOGI(TAG, "Device IP: 192.168.4.1");
 }
 
