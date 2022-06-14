@@ -46,8 +46,9 @@ const nvs_key_data_t nvs_data_list[] =
   , NVS_DATA_PAIR("0003", mac_device_addr)
   , NVS_DATA_PAIR("0004", provision_status)
   , NVS_DATA_PAIR("0005", ota)
-  , NVS_DATA_PAIR("0006", scale_tare)
-  , NVS_DATA_PAIR("0007", wifi)
+  , NVS_DATA_PAIR("0006", wifi)
+  , NVS_DATA_PAIR("0007", soft_ap)
+  , NVS_DATA_PAIR("0008", properties)
 };
 
 /* Private macros ----------------------------------------------------- */
@@ -61,11 +62,21 @@ nvs_handle m_nvs_handle;
 /* Function definitions ----------------------------------------------- */
 void sys_nvs_reset_data(void)
 {
-  g_nvs_setting_data.data_version     = NVS_DATA_VERSION;
-  g_nvs_setting_data.provision_status = (uint8_t)(AWS_PROVISION_NONE);
-  g_nvs_setting_data.scale_tare       = 0;
+  g_nvs_setting_data.data_version          = NVS_DATA_VERSION;
+  g_nvs_setting_data.provision_status      = (uint8_t)(AWS_PROVISION_NONE);
+
+  g_nvs_setting_data.properties.sleep_duration = 30;
+  g_nvs_setting_data.properties.transmit_delay = 5;
+  g_nvs_setting_data.properties.offline_cnt    = 0;
+  g_nvs_setting_data.properties.scale_tare     = 0;
   
   memset(&g_nvs_setting_data.wifi, 0, sizeof(g_nvs_setting_data.wifi));
+
+  g_nvs_setting_data.soft_ap.is_change = false;
+
+  sprintf(g_nvs_setting_data.soft_ap.ssid, "%s", "Lox-Device");
+  sprintf(g_nvs_setting_data.soft_ap.pwd, "%s", ESP_WIFI_PASS_DEFAULT_AP);
+
 }
 
 void sys_nvs_init(void)

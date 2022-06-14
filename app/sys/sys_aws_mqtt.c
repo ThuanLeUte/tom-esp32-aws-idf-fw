@@ -154,7 +154,6 @@ static void m_sys_aws_subscribe_callback_handler(AWS_IoT_Client *p_client,
                                                  IoT_Publish_Message_Params *params,
                                                  void *p_data)
 {
-  jsmntok_t *json_obs;
   char buf[200];
   memset(buf, 0, 200);
 

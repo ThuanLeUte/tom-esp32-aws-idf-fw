@@ -19,7 +19,6 @@
 #include "bsp.h"
 
 /* Private defines ---------------------------------------------------- */
-
 /* Private enumerate/structure ---------------------------------------- */
 /*
 NTP server struct

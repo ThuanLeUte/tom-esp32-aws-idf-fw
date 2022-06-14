@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset=utf-8>
+    <meta http-equiv=X-UA-Compatible content=IE=edge>
+    <meta name=viewport content="width=device-width, initial-scale=1">
+    <title>Main</title>
+    <link href=web/css/bootstrap.min.css rel=stylesheet>
+    <link href=web/css/pixie-main.css rel=stylesheet>
+</head>
+
+<body>
+    <div class=main-box>
+        <ul class="nav nav-pills">
+            <li>
+                <a data-toggle=pill href=system>
+                    <img src=web/images/status.png alt>System</a>
+            </li>
+            <li>
+                <a data-toggle=pill href=ap>
+                    <img src=web/images/network.png alt>Customer AP</a>
+            </li>
+            <li id="liService">
+                <a data-toggle=pill href=properties>
+                    <img src=web/images/service.png alt>Properties</a>
+            </li>
+            <li class=active>
+                <a data-toggle=pill href=reboot>
+                    <img src=web/images/other.png alt>Reboot</a>
+            </li>
+        </ul>
+        <div class=tab-content>
+            <div id=other class="tab-pane fade in active">
+
+                <h4>
+                    <img src=web/images/reboot.png alt>Save and Reboot</h4>
+                    <div class="row"> 
+                    <div class="col-md-12">
+                        <a class="btn btn-block" type="button" id="reboot_btn" title=Reboot
+                        onclick="btn_other_reboot()">Reboot</a>
+                    </div></br>
+                </br><h3> NOTE : Reboot will disconnect gateway AP</h3>
+                    </div>
+            </div>
+        </div>
+    </body>
+</html></div></div><script src="web/js/jquery.min.js"></script><script src="web/js/bootstrap.min.js"></script><script src="web/js/pixie-custom.js"></script><script type="text/javascript">
+    
+    var xhttp = new XMLHttpRequest();
+
+    function btn_other_reboot() {
+
+        xhttp.open("POST", "/button_handler", true);
+
+        var setup_obj = new Object();
+
+        setup_obj.operation   = "reboot";
+
+        // Convert object to json string
+        var string = JSON.stringify(setup_obj);
+
+        xhttp.send(string);
+    }
+
+</script></body></html>

@@ -13,8 +13,7 @@
 #include "sys_devcfg.h"
 
 /* Private defines ---------------------------------------------------------- */
-#define AWS_CLIENT_ID_FMT          "ESP32S3%02X%02X%02X%02X%02X%02X"
-#define BLUFI_NAME_FMT_EMPTY       "ESP32S3%02x%02x"
+#define BLUFI_NAME_FMT_EMPTY       "LOX_SCALE_%02X%02x"
 #define DEVICE_MAC_ADDR_FMT        "%02X:%02X:%02X:%02X:%02X:%02X"
 
 const char *HEX_CHAR = "0123456789ABCDEF";

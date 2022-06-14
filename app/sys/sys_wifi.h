@@ -21,6 +21,9 @@
 #define WIFI_CONNECT_TIMEOUT_MS         (20000)     // 20s
 #define WIFI_MAX_STATION_NUM            (100)       // Max wifi stations store in flash
 
+#define ESP_WIFI_SSID_DEFAULT_AP        "LOX_SCALE"
+#define ESP_WIFI_PASS_DEFAULT_AP        "123456789"
+
 /* Public enumerate/structure ----------------------------------------- */
 typedef enum
 {
@@ -50,7 +53,12 @@ void sys_wifi_softap_init(void);
 /**
  * @brief         Wifi connect
  */
-void sys_wifi_connect(void);
+void sys_wifi_sta_start(void);
+
+bool sys_wifi_connect(const char *ssid, const char *password);
+bool sys_wifi_is_scan_done(void);;
+void sys_wifi_get_scan_wifi_list(char *buf, uint16_t size);
+void sys_wifi_set_wifi_scan_status(bool done);
 
 /**
  * @brief         Check that WiFi is connected or not
@@ -82,6 +90,8 @@ void sys_wifi_update_event_handler(void);
  * 
  */
 void sys_wifi_config_set(const char *ssid, const char *pwd);
+
+void sys_wifi_scan_start(void);
 
 #endif /* __SYS_WIFI_H */
 

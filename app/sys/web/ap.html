@@ -1,0 +1,171 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset=utf-8>
+    <meta http-equiv=X-UA-Compatible content=IE=edge>
+    <meta name=viewport content="width=device-width, initial-scale=1">
+    <title>Main</title>
+    <link href=web/css/bootstrap.min.css rel=stylesheet>
+    <link href=web/css/pixie-main.css rel=stylesheet>
+</head>
+
+<body>
+    <div class=main-box>
+        <ul class="nav nav-pills">
+            <li>
+                <a data-toggle=pill href=system>
+                    <img src=web/images/status.png alt>System</a>
+            </li>
+            <li  class=active>
+                <a data-toggle=pill href=ap>
+                    <img src=web/images/network.png alt>Customer AP</a>
+            </li>
+            <li id="liService">
+                <a data-toggle=pill href=properties>
+                    <img src=web/images/service.png alt>Properties</a>
+            </li>
+            <li>
+                <a data-toggle=pill href=reboot>
+                    <img src=web/images/other.png alt>Reboot</a>
+            </li>
+        </ul>
+        <div class=tab-content>
+            <div id=network class="tab-pane fade in active">
+                <div class=panel-group id=accordion>
+
+                    <div class="panel panel-default">
+                        <div id=collapse1 class="panel-heading">
+                            <div class=panel-body>
+                                <div class=form-group>
+                                    <label>Customer AP</label>
+                                    <select class="mdb-select form-control" id="drpWLAN" placeholder=Scan for wifi>
+                                        <option value=1 placeholder="scan for wifi" ></option>
+
+                                    </select>
+                                </div>
+                                <div class=form-group>
+                                    <label for=defaultFormCardEmailEx
+                                        class="grey-text font-weight-light">Password</label>
+                                    <input type=password id="wifi_pass" class=form-control placeholder=Password> 
+                                      <input type="checkbox" onclick="router_pass_function()"> show password
+
+                                    </div>
+
+                                <div class=text-center>
+                                    <button class="btn btn-block" type="button" id="scan_wifi" title=scan
+                                    onclick="btn_network_scan_wifi()">Scan Wi-fi</button>
+                                </div></BR>
+                                <div class=form-group>
+        
+                                </div>
+                                <div class=text-center>
+                                    <button class="btn btn-block" type="button" id="con_btn" title=Connect 
+                                    onclick="btn_network_connect()">Connect</button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </body>
+</html></div></div><script src="web/js/jquery.min.js"></script><script src="web/js/bootstrap.min.js"></script><script src="web/js/pixie-custom.js"></script><script type="text/javascript">
+
+    var xhttp = new XMLHttpRequest();
+
+    var scan = false;
+
+    function router_pass_function() {
+    
+        var x = document.getElementById("wifi_pass");
+
+        if (x.type === "password") {
+            x.type = "text";
+        } else {
+            x.type = "password";
+        }
+    }
+
+    function btn_network_scan_wifi() {
+        xhttp.open("POST", "/button_handler", true);
+
+        var setup_obj = new Object();
+
+        setup_obj.operation   = "network_scan_wifi";
+
+        // Convert object to json string
+        var string = JSON.stringify(setup_obj);
+
+        xhttp.send(string);
+        scan = true;
+    }
+
+    function btn_network_connect() {
+
+        xhttp.open("POST", "/button_handler", true);
+
+        var setup_obj = new Object();
+
+        var wifi_pass = document.getElementById("wifi_pass").value;
+        var select    = document.getElementById('drpWLAN');
+        var drpWLAN   = select.options[select.selectedIndex].text;
+
+        if ((wifi_pass.length >= 8) && (drpWLAN.length > 0))
+        {
+            setup_obj.operation    = "network_connect";
+            setup_obj.sta_ssid     = drpWLAN;
+            setup_obj.sta_password = wifi_pass;
+
+            document.getElementById("con_btn").innerText = "Connecting...";
+
+            // Convert object to json string
+            var string = JSON.stringify(setup_obj);
+
+            xhttp.send(string);
+        }
+        else
+        {
+            alert("The SSID empty or Password less than 8");
+        }
+    }
+
+    xhttp.onreadystatechange = function() {
+        const obj = JSON.parse(this.responseText);
+        var type  = obj.type;
+
+        if (type == "wifi_status"){
+            if (obj.status == 1){
+                document.getElementById("con_btn").innerText = "Connected";
+            }
+        }
+
+        if (scan == true)
+        {
+            if (type == "wifi_list"){
+                var html = "";
+                
+                for (var i = 0; i < obj.cnt; i++)
+                {
+                    html = html + " <option value=" + obj.list[i] + ">" + obj.list[i] + "</option>";
+                }
+                
+                document.getElementById("drpWLAN").innerHTML = html;
+                scan = false;
+            }
+        }
+    }
+
+    setInterval( function() {
+        xhttp.open("GET", "/esp32_wifi_list", true);
+        xhttp.send();
+    }, 1500);
+
+    setInterval( function() {
+        xhttp.open("GET", "/esp32_wifi_status", true);
+        xhttp.send();
+    }, 1000);
+
+</script></body></html>

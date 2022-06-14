@@ -21,7 +21,7 @@
 /* Public defines ----------------------------------------------------- */
 // IMPORTANT: The revision of nvs_data_t. Everytime nvs_data_t is changed, 
 // the NVS_DATA_VERSION value must be updated too.
-#define NVS_DATA_VERSION    (uint32_t)(0x000000A2)
+#define NVS_DATA_VERSION    (uint32_t)(0x000000A6)
 
 /* Public enumerate/structure ----------------------------------------- */
 typedef struct nvs_data_struct
@@ -54,7 +54,22 @@ typedef struct nvs_data_struct
   }
   wifi;
 
-  uint16_t scale_tare;
+  struct
+  {
+    char ssid[32];
+    char pwd[32];
+    bool is_change;
+  }
+  soft_ap;
+
+  struct
+  {
+    uint16_t sleep_duration;
+    uint16_t transmit_delay;
+    uint16_t offline_cnt;
+    uint16_t scale_tare;
+  }
+  properties;
 }
 nvs_data_t;
 

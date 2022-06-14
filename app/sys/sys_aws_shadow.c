@@ -66,8 +66,6 @@ static void m_shadow_create_json_format(char *json_buffer, sys_aws_shadow_name_t
 static void m_parse_shadow_get_payload(sys_aws_shadow_name_t name, const char *buf, uint16_t buf_len);
 
 static void m_shadow_scale_tare_callback(const char *p_json_string, uint32_t json_data_len, jsonStruct_t *p_context);
-static void m_shadow_schedule_timeline_callback(const char *p_json_string, uint32_t json_data_len, jsonStruct_t *p_context);
-static void m_shadow_baseline_callback(const char *p_json_string, uint32_t json_data_len, jsonStruct_t *p_context);
 
 static void m_shadow_get_callback(const char          *p_thing_name,
                                   const char          *p_shadow_name,
@@ -192,7 +190,7 @@ static void m_shadow_create_json_format(char *json_buffer, sys_aws_shadow_name_t
 
   case SYS_SHADOW_SCALE_TARE:
   {
-    json_printf(&out, "{data:{scare_tare: %d}}",  g_nvs_setting_data.scale_tare);
+    json_printf(&out, "{data:{scare_tare: %d}}",  g_nvs_setting_data.properties.scale_tare);
     break;
   }
 
@@ -316,9 +314,9 @@ static void m_shadow_scale_tare_callback(const char *p_json_string, uint32_t jso
 
   if (aws_parse_shadow_packet(SYS_SHADOW_SCALE_TARE, p_json_string, json_data_len, &scale_tare))
   {
-    g_nvs_setting_data.scale_tare = scale_tare;
-    ESP_LOGI(TAG, "Scare tare: %d", g_nvs_setting_data.scale_tare);
-    SYS_NVS_STORE(scale_tare);
+    g_nvs_setting_data.properties.scale_tare = scale_tare;
+    ESP_LOGI(TAG, "Scare tare: %d", g_nvs_setting_data.properties.scale_tare);
+    SYS_NVS_STORE(properties);
 
     sys_aws_shadow_trigger_command(SYS_AWS_SHADOW_CMD_SET, SYS_SHADOW_SCALE_TARE);
   }
