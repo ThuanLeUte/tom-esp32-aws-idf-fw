@@ -9,4 +9,4 @@ set(EXTRA_COMPONENT_DIRS "./sys"
                          "./components"
                          "./components/aws_iot")
 
-project(esp32_aws_platform)
+project(caire_cloud_gateway)
