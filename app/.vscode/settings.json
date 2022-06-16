@@ -4,5 +4,5 @@
   "idf.openOcdConfigs": [
     "board/esp32c3-builtin.cfg"
 ],
-"idf.portWin": "COM13"
+"idf.portWin": "COM4"
 }

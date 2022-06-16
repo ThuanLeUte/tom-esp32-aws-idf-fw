@@ -45,8 +45,9 @@ aws_job_t;
 #define AWS_TASK_STACK_SIZE           (8192 / sizeof(StackType_t))
 #define AWS_TASK_PRIORITY             (3)
 
-#define MAX_SIZE_OF_JOB_OPERATION     (20)
-#define MAX_SIZE_OF_JOB_UPGRADE_URL   (150)
+#define MAX_SIZE_OF_JOB_OPERATION (20)
+#define MAX_SIZE_OF_JOB_UPGRADE_URL (150)
+#define FOREVER 1
 
 /* Private Constants -------------------------------------------------------- */
 static const char *TAG = "sys/aws";
@@ -168,9 +169,9 @@ static void m_sys_aws_task(void *params)
   // Jobs service
   sys_aws_jobs_init(&g_sys_aws.client, g_nvs_setting_data.thing_name, m_sys_aws_jobs_next_job_callback);
 
-  while (1)
-  {
-    aws_iot_mqtt_yield(&g_sys_aws.client, 1000);
+    while (FOREVER)
+    {
+        aws_iot_mqtt_yield(&g_sys_aws.client, 1000);
 
     if (aws_iot_mqtt_is_client_connected(&g_sys_aws.client))
     {
