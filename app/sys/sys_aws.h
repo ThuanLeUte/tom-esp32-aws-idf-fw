@@ -107,6 +107,8 @@ void sys_aws_init(void);
  */
 void sys_aws_start(void);
 
+void sys_aws_reconnect_manual(void);
+
 #endif /* __SYS_AWS_H */
 
 /* End of file -------------------------------------------------------- */

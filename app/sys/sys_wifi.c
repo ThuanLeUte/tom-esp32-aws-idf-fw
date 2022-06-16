@@ -301,6 +301,11 @@ static esp_err_t m_sys_wifi_event_handler(void *ctx, system_event_t *event)
     ESP_LOGE(TAG, "Connected!");
     sys_time_init();
 
+    if (g_sys_aws.initialized)
+    {
+      sys_event_group_set(SYS_AWS_RECONNECT_EVT);
+    }
+
     if (!g_nvs_setting_data.ota.enable)
       sys_aws_init();
     break;

@@ -113,6 +113,7 @@ void sys_aws_init(void)
   }
 }
 
+
 void sys_aws_start(void)
 {
   g_sys_aws.evt_queue = xQueueCreate(20, sizeof(sys_aws_service_t));
@@ -123,6 +124,21 @@ void sys_aws_start(void)
               NULL,
               AWS_TASK_PRIORITY,
               NULL);
+}
+
+void sys_aws_reconnect_manual(void)
+{
+  IoT_Error_t status = FAILURE;
+  ESP_LOGW(TAG, "MQTT Reconnect manual");
+
+  ESP_LOGI(TAG, "Starting manual reconnect...");
+
+  status = aws_iot_mqtt_attempt_reconnect(&g_sys_aws.client);
+
+  if (NETWORK_RECONNECTED == status)
+    ESP_LOGI(TAG, "Manual Reconnect Successful");
+  else
+    ESP_LOGW(TAG, "Manual Reconnect Failed - %d", status);
 }
 
 /* Private function definitions --------------------------------------------- */
@@ -137,8 +153,9 @@ void sys_aws_start(void)
  */
 static void m_sys_aws_task(void *params)
 {
-    char temp_buf[AWS_IOT_MQTT_TX_BUF_LEN] = { 0 };
+  char temp_buf[AWS_IOT_MQTT_TX_BUF_LEN] = {0};
   sys_aws_service_t service;
+  EventBits_t evt_bit;
 
   m_sys_aws_connect();
 
@@ -211,6 +228,13 @@ static void m_sys_aws_task(void *params)
     {
       bsp_delay_ms(1000);
     }
+
+    // Check network config
+    evt_bit = xEventGroupWaitBits(g_sys_evt_group, SYS_AWS_RECONNECT_EVT, true, true, 0);
+    if (evt_bit & SYS_AWS_RECONNECT_EVT)
+    {
+      sys_aws_reconnect_manual();
+    }
   }
 }
 
@@ -251,7 +275,7 @@ static bool m_sys_aws_connect(void)
   CHECK(SUCCESS == aws_iot_shadow_connect(&g_sys_aws.client, &shadow_connect_params), false);
 
   // Enable auto reconnect
-  CHECK(SUCCESS == aws_iot_mqtt_autoreconnect_set_status(&g_sys_aws.client, true), false);
+  CHECK(SUCCESS == aws_iot_mqtt_autoreconnect_set_status(&g_sys_aws.client, false), false);
 
   return true;
 }

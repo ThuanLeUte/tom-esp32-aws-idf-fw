@@ -21,7 +21,7 @@
 #define DEVICE_FIRMWARE_VERSION           "10000000"
 #define DEVICE_HARDWARE_VERSION           "100"
 
-#define SYS_DEVCFG_DONE_EVT               BIT1
+#define SYS_AWS_RECONNECT_EVT              BIT0
 
 #define FSM_UPDATE_STATE(new_state)                     \
   do {                                                  \
