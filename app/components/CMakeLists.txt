@@ -10,6 +10,7 @@ set(COMPONENT_SRCS "./blufi_security/blufi_security.c"
                    "./lib_adf/nvs_action.c"
                    "./lib_adf/wifi_ssid_manager.c"
                    "./bsp/bsp_timer.c"
+                   "./bsp/bsp_error.c"
                    )
 
 set(COMPONENT_ADD_INCLUDEDIRS .

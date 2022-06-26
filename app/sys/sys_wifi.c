@@ -249,12 +249,15 @@ void sys_wifi_set_wifi_scan_status(bool done)
 bool sys_wifi_connect(const char *ssid, const char *password)
 {
   wifi_config_t config = {0};
+  esp_err_t err;
 
   if (m_wifi.is_softap_mode == false)
   {
     wifi_ssid_manager_list_show(g_ssid_manager);
 
-    if (ESP_OK == wifi_ssid_manager_get_best_config(g_ssid_manager, &config))
+    err = wifi_ssid_manager_get_best_config(g_ssid_manager, &config);
+
+    if (ESP_OK == err)
     {
 __LBL_WIFI_CONNECT__:
       ESP_LOGW(TAG, "Selected SSID: %s (%s)", config.sta.ssid, config.sta.password);
@@ -264,6 +267,7 @@ __LBL_WIFI_CONNECT__:
     }
     else
     {
+      bsp_error_esp_to_name(err);
       ESP_LOGE(TAG, "Can not get the WiFi station in the WiFi save list");
       esp_wifi_connect();
       return false;

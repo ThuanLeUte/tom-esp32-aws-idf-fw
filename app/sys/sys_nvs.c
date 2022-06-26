@@ -17,6 +17,7 @@
 #include "nvs_flash.h"
 #include "sys_aws_provision.h"
 #include "bsp.h"
+#include "bsp_error.h"
 
 /* Public variables --------------------------------------------------- */
 nvs_data_t g_nvs_setting_data;
@@ -49,6 +50,7 @@ const nvs_key_data_t nvs_data_list[] =
   , NVS_DATA_PAIR("0006", wifi)
   , NVS_DATA_PAIR("0007", soft_ap)
   , NVS_DATA_PAIR("0008", properties)
+  , NVS_DATA_PAIR("0009", bsp_error)
 };
 
 /* Private macros ----------------------------------------------------- */
@@ -76,7 +78,8 @@ void sys_nvs_reset_data(void)
 
   sprintf(g_nvs_setting_data.soft_ap.ssid, "%s", "Lox-Device");
   sprintf(g_nvs_setting_data.soft_ap.pwd, "%s", ESP_WIFI_PASS_DEFAULT_AP);
-
+  
+  memset(&g_nvs_setting_data.bsp_error, 0, sizeof(g_nvs_setting_data.bsp_error));
 }
 
 void sys_nvs_init(void)
@@ -140,7 +143,7 @@ void sys_nvs_init(void)
 _LBL_END_:
 
   ESP_LOGE(TAG, "NVS storage init faild");
-  bsp_error_handler(BSP_ERR_NVS_INIT);
+  bsp_error_add(BSP_ERR_NVS_INIT);
 }
 
 void sys_nvs_deinit(void)
@@ -177,7 +180,7 @@ void sys_nvs_store_all(void)
 _LBL_END_:
 
   ESP_LOGE(TAG, "NVS store all data error");
-  bsp_error_handler(BSP_ERR_NVS_COMMUNICATION);
+  bsp_error_add(BSP_ERR_NVS_COMMUNICATION);
 }
 
 void sys_nvs_load_all(void)
@@ -199,7 +202,7 @@ void sys_nvs_load_all(void)
     if (nvs_get_blob(m_nvs_handle, nvs_data_list[i].key, p_data, &var_len) != ESP_OK)
     {
       ESP_LOGE(TAG, "NVS load all data error");
-      bsp_error_handler(BSP_ERR_NVS_COMMUNICATION);
+      bsp_error_add(BSP_ERR_NVS_COMMUNICATION);
     }
   }
 }
@@ -220,7 +223,7 @@ void sys_nvs_store(char * p_key_name, void * p_src, uint32_t len)
 _LBL_END_:
 
   ESP_LOGE(TAG, "NVS store data error");
-  bsp_error_handler(BSP_ERR_NVS_COMMUNICATION);
+  bsp_error_add(BSP_ERR_NVS_COMMUNICATION);
 }
 
 void sys_nvs_load(char *p_key_name, void *p_des, uint32_t len)
@@ -231,7 +234,7 @@ void sys_nvs_load(char *p_key_name, void *p_des, uint32_t len)
   if (nvs_get_blob(m_nvs_handle, p_key_name, p_des, (size_t *)&len) != ESP_OK)
   {
     ESP_LOGE(TAG, "NVS load data error");
-    bsp_error_handler(BSP_ERR_NVS_COMMUNICATION);
+    bsp_error_add(BSP_ERR_NVS_COMMUNICATION);
   }
 }
 
@@ -248,7 +251,7 @@ void sys_nvs_factory_reset(void)
 _LBL_END_:
 
   ESP_LOGE(TAG, "NVS factory reset failed");
-  bsp_error_handler(BSP_ERR_NVS_COMMUNICATION);
+  bsp_error_add(BSP_ERR_NVS_COMMUNICATION);
 }
 
 char *sys_nvs_lookup_key(uint32_t offset, uint32_t size)
