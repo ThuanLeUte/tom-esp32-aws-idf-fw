@@ -59,11 +59,17 @@ void sys_wifi_init(void)
   // Init TCP/IP stack
   err = esp_netif_init();
   if (err != ESP_OK)
+  {
+    ESP_LOGE(TAG, "Esp netif init error: %s", esp_err_to_name(err));
     goto _LBL_END;
+  }
 
   err = esp_event_loop_create_default();
   if (err != ESP_OK)
+  {
+    ESP_LOGE(TAG, "Esp event loop create default error: %s", esp_err_to_name(err));
     goto _LBL_END;
+  }
 
   // Wifi ssid manager create
   g_ssid_manager = wifi_ssid_manager_create(WIFI_MAX_STATION_NUM);
@@ -71,7 +77,6 @@ void sys_wifi_init(void)
   return;
 
 _LBL_END:
-  BSP_ERROR_DISPLAY(err);
   ESP_ERROR_CHECK(err);
 }
 
@@ -89,7 +94,7 @@ void sys_wifi_sta_init(void)
   err = esp_wifi_init(&wifi_init_cfg);
   if (err != ESP_OK)
   {
-    BSP_ERROR_DISPLAY(err);
+    ESP_LOGE(TAG, "Esp wifi init error: %s", esp_err_to_name(err));
     ESP_ERROR_CHECK(err);
   }
 }
@@ -107,7 +112,10 @@ void sys_wifi_softap_init(void)
 
   err = esp_wifi_init(&cfg);
   if (err != ESP_OK)
+  {
+    ESP_LOGE(TAG, "Esp wifi init error: %s", esp_err_to_name(err));
     goto _LBL_END;
+  }
 
   err = esp_event_handler_instance_register(WIFI_EVENT,
                                             ESP_EVENT_ANY_ID,
@@ -115,7 +123,10 @@ void sys_wifi_softap_init(void)
                                             NULL,
                                             NULL);
   if (err != ESP_OK)
+  {
+    ESP_LOGE(TAG, "Esp event handler instance register error: %s", esp_err_to_name(err));
     goto _LBL_END;
+  }
 
   wifi_config_t wifi_config = {
       .ap = {
@@ -136,15 +147,24 @@ void sys_wifi_softap_init(void)
 
   err = esp_wifi_set_mode(WIFI_MODE_APSTA);
   if (err != ESP_OK)
+  {
+    ESP_LOGE(TAG, "Esp wifi set mode error: %s", esp_err_to_name(err));
     goto _LBL_END;
+  }
 
   err = esp_wifi_set_config(WIFI_IF_AP, &wifi_config);
   if (err != ESP_OK)
+  {
+    ESP_LOGE(TAG, "Esp wifi set config error: %s", esp_err_to_name(err));
     goto _LBL_END;
+  }
 
   err = esp_wifi_start();
   if (err != ESP_OK)
+  {
+    ESP_LOGE(TAG, "Esp wifi start error: %s", esp_err_to_name(err));
     goto _LBL_END;
+  }
 
   // Start time for wait time
   bsp_tmr_auto_init(&m_wifi_softap_atm, m_sys_wifi_softap_expired_callback);
@@ -156,7 +176,6 @@ void sys_wifi_softap_init(void)
   return;
 
 _LBL_END:
-  BSP_ERROR_DISPLAY(err);
   ESP_ERROR_CHECK(err);
 }
 
@@ -166,20 +185,28 @@ void sys_wifi_sta_start(void)
 
   err = esp_event_loop_init(m_sys_wifi_event_handler, NULL);
   if (err != ESP_OK)
+  {
+    ESP_LOGE(TAG, "Esp wifi loop init error: %s", esp_err_to_name(err));
     goto _LBL_END;
+  }
 
   err = esp_wifi_set_mode(WIFI_MODE_STA);
   if (err != ESP_OK)
+  {
+    ESP_LOGE(TAG, "Esp wifi loop set mode error: %s", esp_err_to_name(err));
     goto _LBL_END;
+  }
 
   err = esp_wifi_start();
   if (err != ESP_OK)
+  {
+    ESP_LOGE(TAG, "Esp wifi start error: %s", esp_err_to_name(err));
     goto _LBL_END;
+  }
 
   return;
 
 _LBL_END:
-  BSP_ERROR_DISPLAY(err);
   ESP_ERROR_CHECK(err);
 }
 
@@ -200,19 +227,24 @@ void sys_wifi_erase_config(void)
   // Delete network configs
   err = esp_wifi_get_config(WIFI_IF_STA, &m_wifi.config);
   if (err != ESP_OK)
+  {
+    ESP_LOGE(TAG, "Esp wifi set config error: %s", esp_err_to_name(err));
     goto _LBL_END;
+  }
   
   memset(m_wifi.config.sta.ssid, 0, sizeof(m_wifi.config.sta.ssid));
   memset(m_wifi.config.sta.password, 0, sizeof(m_wifi.config.sta.password));
 
   err = esp_wifi_set_config(WIFI_IF_STA, &m_wifi.config);
   if (err != ESP_OK)
+  {
+    ESP_LOGE(TAG, "Esp wifi set config error: %s", esp_err_to_name(err));
     goto _LBL_END;
+  }
 
   return;
 
 _LBL_END:
-  BSP_ERROR_DISPLAY(err);
   ESP_ERROR_CHECK(err);
 }
 
@@ -253,7 +285,7 @@ void sys_wifi_scan_start(void)
   err = esp_wifi_scan_start(&scan_cfg, true);
   if (err != ESP_OK)
   {
-    BSP_ERROR_DISPLAY(err);
+    ESP_LOGE(TAG, "Esp wifi scan error: %s", esp_err_to_name(err));
     ESP_ERROR_CHECK(err);
   }
 }
@@ -346,7 +378,7 @@ __LBL_WIFI_CONNECT__:
     }
     else
     {
-      BSP_ERROR_DISPLAY(err);
+      ESP_LOGE(TAG, "Esp wifi manager get bet config error: %s", esp_err_to_name(err));
       ESP_LOGW(TAG, "Can not get the WiFi station in the WiFi save list");
       esp_wifi_connect();
       return false;

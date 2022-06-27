@@ -19,7 +19,6 @@
 
 /* Public defines ----------------------------------------------------- */
 #define BSP_ERROR_CNT_MAX         100
-#define BSP_ERROR_DISPLAY(err)    bsp_error_esp_to_name(err)
 
 /* Public variables --------------------------------------------------- */
 typedef struct
@@ -115,11 +114,6 @@ uint32_t bsp_error_read(void);
  * @return        None
  */
 void bsp_error_sync(void);
-
-/**
- * @brief Esp error to name
- */
-void bsp_error_esp_to_name(esp_err_t err);
 
 #endif /* __BSP_ERROR_H */
 

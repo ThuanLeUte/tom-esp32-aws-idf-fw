@@ -93,10 +93,5 @@ void bsp_error_sync(void)
   SYS_NVS_STORE(bsp_error);
 }
 
-void bsp_error_esp_to_name(esp_err_t err)
-{
-  ESP_LOGE(TAG, "Error: %s", esp_err_to_name(err));
-}
-
 /* Private function --------------------------------------------------------- */
 /* End of file -------------------------------------------------------------- */
