@@ -108,6 +108,7 @@ void sys_aws_init(void);
 void sys_aws_start(void);
 
 void sys_aws_reconnect_manual(void);
+void sys_aws_send_error_code(void);
 
 #endif /* __SYS_AWS_H */
 

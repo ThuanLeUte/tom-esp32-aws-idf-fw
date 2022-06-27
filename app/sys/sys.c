@@ -21,6 +21,7 @@
 #include "sys_aws.h"
 #include "sys_ota.h"
 #include "sys_http_server.h"
+#include "bsp_error.h"
 
 /* Private defines ---------------------------------------------------- */
 static const char *TAG = "sys";
@@ -90,6 +91,7 @@ void sys_boot(void)
   sys_nvs_init();
   bsp_spiffs_init();
   m_sys_evt_group_init();
+  bsp_error_init();
 
   // WiFi Setup ---------------------------------- {
   sys_wifi_init();
@@ -240,6 +242,8 @@ const char *sys_event_id_to_name(system_event_id_t evt)
 
   return "EVENT NONE";
 }
+
+
 
 
 /* Private function --------------------------------------------------------- */

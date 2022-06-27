@@ -32,6 +32,7 @@ typedef struct
   nvs;
 
   uint16_t err_start;
+  uint16_t err_code;
 }
 bsp_error_t;
 

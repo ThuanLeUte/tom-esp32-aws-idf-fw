@@ -49,6 +49,7 @@ static const sys_shadow_t SHADOW_TABLE[] =
   //          +----------------------------------+---------------------+
      SHADOW_INFO(SYS_SHADOW_FIRMWARE_ID          , "firmware_id"       )
     ,SHADOW_INFO(SYS_SHADOW_SCALE_TARE           , "scale_tare"        )
+    ,SHADOW_INFO(SYS_AWS_ERROR_CODE              , "error_code"        )
   //          +==================================+=====================+
 };
 
@@ -220,6 +221,12 @@ static void m_shadow_create_json_format(char *json_buffer, sys_aws_shadow_name_t
   case SYS_SHADOW_SCALE_TARE:
   {
     json_printf(&out, "{data:{scare_tare: %d}}",  g_nvs_setting_data.properties.scale_tare);
+    break;
+  }
+
+  case SYS_AWS_ERROR_CODE:
+  {
+    json_printf(&out, "{value: %d}", g_nvs_setting_data.bsp_error.err_code);
     break;
   }
 
@@ -398,6 +405,14 @@ static void m_shadow_update_status_callback(const char          *p_thing_name,
   case SHADOW_ACK_ACCEPTED:
   {
     ESP_LOGI(TAG, "Update accepted");
+
+    // Delete error code have been sent out
+    if (memcmp(p_shadow_name, SHADOW_TABLE[SYS_AWS_ERROR_CODE].name, strlen(SHADOW_TABLE[SYS_AWS_ERROR_CODE].name)) == 0)
+    {
+      ESP_LOGW(TAG, "Delete error code: %d",
+               g_nvs_setting_data.bsp_error.nvs.code[g_nvs_setting_data.bsp_error.nvs.err_cnt - 1]);
+      bsp_error_remove();
+    }
     break;
   }
   default:
