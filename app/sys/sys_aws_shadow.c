@@ -49,6 +49,7 @@ static const sys_shadow_t SHADOW_TABLE[] =
   //          +----------------------------------+---------------------+
      SHADOW_INFO(SYS_SHADOW_FIRMWARE_ID          , "firmware_id"       )
     ,SHADOW_INFO(SYS_SHADOW_SCALE_TARE           , "scale_tare"        )
+    ,SHADOW_INFO(SYS_AWS_ERROR_CODE              , "error_code"        )
   //          +==================================+=====================+
 };
 
@@ -83,11 +84,18 @@ static void m_shadow_update_status_callback(const char          *p_thing_name,
 /* Function definitions ----------------------------------------------------- */
 bool sys_aws_shadow_init(void)
 {
+  IoT_Error_t err;
+
   // AWS shadow json init. Register callback and key
   m_shadow_json_init();
 
   // AWS register delta
-  CHECK(SUCCESS == aws_iot_shadow_register_delta(&g_sys_aws.client, SHADOW_TABLE[SYS_SHADOW_SCALE_TARE].name, &m_json_struct[SYS_SHADOW_SCALE_TARE]), false);
+  err = aws_iot_shadow_register_delta(&g_sys_aws.client, SHADOW_TABLE[SYS_SHADOW_SCALE_TARE].name, &m_json_struct[SYS_SHADOW_SCALE_TARE]);
+  if (err != SUCCESS)
+  {
+    ESP_LOGI(TAG, "AWS register delta error: %s", aws_error_to_name(err));
+    return false;
+  }
 
   // NOTE: Device will gets status of shadow on AWS first then 
   //       will update new status on AWS even device call shadow update
@@ -118,31 +126,53 @@ void sys_aws_shadow_trigger_command(sys_aws_shadow_cmd_t cmd, sys_aws_shadow_nam
 
 bool sys_aws_shadow_update(sys_aws_shadow_name_t name)
 {
+  IoT_Error_t err;
+
   ESP_LOGI(TAG, "Shadow update...");
 
-  CHECK(SUCCESS == aws_iot_shadow_init_json_document(m_json_buffer, m_size_json_buffer), false);
+  err = aws_iot_shadow_init_json_document(m_json_buffer, m_size_json_buffer);
+  if (err != SUCCESS)
+  {
+    ESP_LOGI(TAG, "Shadow init json document error: %s", aws_error_to_name(err));
+    return false;
+  }
 
-  CHECK(SUCCESS == aws_iot_shadow_add_desired(m_json_buffer, m_size_json_buffer), false);
+  err = aws_iot_shadow_add_desired(m_json_buffer, m_size_json_buffer);
+  if (err != SUCCESS)
+  {
+    ESP_LOGI(TAG, "Shadow add desired error: %s", aws_error_to_name(err));
+    return false;
+  }
 
   m_shadow_create_json_format(m_json_buffer, name);
 
-  CHECK(SUCCESS == aws_iot_shadow_add_reported(m_json_buffer, m_size_json_buffer), false);
+  err = aws_iot_shadow_add_reported(m_json_buffer, m_size_json_buffer);
+  if (err != SUCCESS)
+  {
+    ESP_LOGI(TAG, "Shadow add reported error: %s", aws_error_to_name(err));
+    return false;
+  }
 
   m_shadow_create_json_format(m_json_buffer, name);
 
-  CHECK(SUCCESS == aws_iot_finalize_json_document(m_json_buffer, m_size_json_buffer), false);
+  err = aws_iot_finalize_json_document(m_json_buffer, m_size_json_buffer);
+  if (err != SUCCESS)
+  {
+    ESP_LOGI(TAG, "Shadow finalize json document error: %s", aws_error_to_name(err));
+    return false;
+  }
 
   ESP_LOGI(TAG, "Json buffer: %s", m_json_buffer);
 
-  IoT_Error_t rc  = aws_iot_shadow_update(&g_sys_aws.client, (const char *)g_nvs_setting_data.thing_name,
-                                          SHADOW_TABLE[name].name, m_json_buffer,
-                                          m_shadow_update_status_callback,
-                                          NULL, 4, true);
-
-  ESP_LOGI(TAG, "Shadow update error code: %d", rc);
-
-  if (SUCCESS != rc)
+  err = aws_iot_shadow_update(&g_sys_aws.client, (const char *)g_nvs_setting_data.thing_name,
+                              SHADOW_TABLE[name].name, m_json_buffer,
+                              m_shadow_update_status_callback,
+                              NULL, 4, true);
+  if (err != SUCCESS)
+  {
+    ESP_LOGI(TAG, "Shadow update error: %s", aws_error_to_name(err));
     return false;
+  }
 
   CHECK(SUCCESS == aws_iot_shadow_yield(&g_sys_aws.client, 200), false);
 
@@ -151,14 +181,14 @@ bool sys_aws_shadow_update(sys_aws_shadow_name_t name)
 
 bool sys_aws_shadow_get(sys_aws_shadow_name_t name)
 {
-  IoT_Error_t rc = aws_iot_shadow_get(&g_sys_aws.client, (const char *)g_nvs_setting_data.thing_name,
-                                      SHADOW_TABLE[name].name, m_shadow_get_callback,
-                                      NULL, 4, true);
-
-  ESP_LOGI(TAG, "Shadow get error code: %d", rc);
-
-  if (SUCCESS != rc)
+  IoT_Error_t err = aws_iot_shadow_get(&g_sys_aws.client, (const char *)g_nvs_setting_data.thing_name,
+                                       SHADOW_TABLE[name].name, m_shadow_get_callback,
+                                       NULL, 4, true);
+  if (err != SUCCESS)
+  {
+    ESP_LOGI(TAG, "Shadow get error: %s", aws_error_to_name(err));
     return false;
+  }
 
   return true;
 }
@@ -191,6 +221,12 @@ static void m_shadow_create_json_format(char *json_buffer, sys_aws_shadow_name_t
   case SYS_SHADOW_SCALE_TARE:
   {
     json_printf(&out, "{data:{scare_tare: %d}}",  g_nvs_setting_data.properties.scale_tare);
+    break;
+  }
+
+  case SYS_AWS_ERROR_CODE:
+  {
+    json_printf(&out, "{value: %d}", g_nvs_setting_data.bsp_error.err_code);
     break;
   }
 
@@ -369,6 +405,14 @@ static void m_shadow_update_status_callback(const char          *p_thing_name,
   case SHADOW_ACK_ACCEPTED:
   {
     ESP_LOGI(TAG, "Update accepted");
+
+    // Delete error code have been sent out
+    if (memcmp(p_shadow_name, SHADOW_TABLE[SYS_AWS_ERROR_CODE].name, strlen(SHADOW_TABLE[SYS_AWS_ERROR_CODE].name)) == 0)
+    {
+      ESP_LOGW(TAG, "Delete error code: %d",
+               g_nvs_setting_data.bsp_error.nvs.code[g_nvs_setting_data.bsp_error.nvs.err_cnt - 1]);
+      bsp_error_remove();
+    }
     break;
   }
   default:

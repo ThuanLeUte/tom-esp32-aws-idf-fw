@@ -431,7 +431,7 @@ esp_err_t wifi_ssid_manager_get_best_config(wifi_ssid_manager_handle_t handle, w
             ret |= nvs_ssid_list_conf_save(handle, &conf);
             return ret;
         } else {
-            ESP_LOGE(TAG, "There is no accessable wifi info stored in flash");
+            ESP_LOGW(TAG, "There is no accessable wifi info stored in flash");
             return ESP_FAIL;
         }
     } else {

@@ -29,6 +29,7 @@ typedef enum
 {
    SYS_SHADOW_FIRMWARE_ID = 0
   ,SYS_SHADOW_SCALE_TARE
+  ,SYS_AWS_ERROR_CODE
   ,SYS_SHADOW_MAX
 }
 sys_aws_shadow_name_t;

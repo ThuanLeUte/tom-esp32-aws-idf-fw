@@ -17,6 +17,7 @@
 #include "nvs_flash.h"
 #include "sys_aws_provision.h"
 #include "bsp.h"
+#include "bsp_error.h"
 
 /* Public variables --------------------------------------------------- */
 nvs_data_t g_nvs_setting_data;
@@ -49,6 +50,7 @@ const nvs_key_data_t nvs_data_list[] =
   , NVS_DATA_PAIR("0006", wifi)
   , NVS_DATA_PAIR("0007", soft_ap)
   , NVS_DATA_PAIR("0008", properties)
+  , NVS_DATA_PAIR("0009", bsp_error)
 };
 
 /* Private macros ----------------------------------------------------- */
@@ -76,7 +78,8 @@ void sys_nvs_reset_data(void)
 
   sprintf(g_nvs_setting_data.soft_ap.ssid, "%s", "Lox-Device");
   sprintf(g_nvs_setting_data.soft_ap.pwd, "%s", ESP_WIFI_PASS_DEFAULT_AP);
-
+  
+  memset(&g_nvs_setting_data.bsp_error, 0, sizeof(g_nvs_setting_data.bsp_error));
 }
 
 void sys_nvs_init(void)
@@ -97,7 +100,8 @@ void sys_nvs_init(void)
     goto _LBL_END_;
 
   // Open NVS
-  if (nvs_open(NVS_STORAGE_SPACENAME, NVS_READWRITE, &m_nvs_handle) != ESP_OK)
+  err = nvs_open(NVS_STORAGE_SPACENAME, NVS_READWRITE, &m_nvs_handle);
+  if (err != ESP_OK)
     goto _LBL_END_;
 
   // Get NVS data version
@@ -120,11 +124,16 @@ void sys_nvs_init(void)
     sys_nvs_store_all();
 
     // Update new NVS data version
-    if (nvs_set_u32(m_nvs_handle, NVS_VERSION_KEY_NAME, g_nvs_setting_data.data_version) != ESP_OK)
+    err = nvs_set_u32(m_nvs_handle, NVS_VERSION_KEY_NAME, g_nvs_setting_data.data_version);
+    if (err != ESP_OK)
       goto _LBL_END_;
 
-    if (nvs_commit(m_nvs_handle) != ESP_OK)
+    err = nvs_commit(m_nvs_handle);
+    if (err != ESP_OK)
+    {
+      ESP_LOGE(TAG, "NVS commit error: %s", esp_err_to_name(err));
       goto _LBL_END_;
+    }
   }
   else
   {
@@ -138,9 +147,8 @@ void sys_nvs_init(void)
   return;
 
 _LBL_END_:
-
   ESP_LOGE(TAG, "NVS storage init faild");
-  bsp_error_handler(BSP_ERR_NVS_INIT);
+  bsp_error_add(BSP_ERR_NVS_INIT);
 }
 
 void sys_nvs_deinit(void)
@@ -150,6 +158,7 @@ void sys_nvs_deinit(void)
 
 void sys_nvs_store_all(void)
 {
+  esp_err_t err;
   uint16_t sizeof_nvs_data_list;
   uint32_t addr;
   void *p_data;
@@ -164,12 +173,20 @@ void sys_nvs_store_all(void)
     p_data = (void *)(addr + nvs_data_list[i].offset);
     var_len = (size_t)nvs_data_list[i].size;
 
-    if (nvs_set_blob(m_nvs_handle, nvs_data_list[i].key, p_data, var_len) != ESP_OK)
+    err = nvs_set_blob(m_nvs_handle, nvs_data_list[i].key, p_data, var_len);
+    if (err != ESP_OK)
+    {
+      ESP_LOGE(TAG, "NVS set blod error: %s", esp_err_to_name(err));
      goto _LBL_END_;
+    }
 
     // Commit written value
-    if (nvs_commit(m_nvs_handle) != ESP_OK)
+    err = nvs_commit(m_nvs_handle);
+    if (err != ESP_OK)
+    {
+      ESP_LOGE(TAG, "NVS commit error: %s", esp_err_to_name(err));
       goto _LBL_END_;
+    }
   }
 
   return;
@@ -177,11 +194,12 @@ void sys_nvs_store_all(void)
 _LBL_END_:
 
   ESP_LOGE(TAG, "NVS store all data error");
-  bsp_error_handler(BSP_ERR_NVS_COMMUNICATION);
+  bsp_error_add(BSP_ERR_NVS_COMMUNICATION);
 }
 
 void sys_nvs_load_all(void)
 {
+  esp_err_t err;
   uint16_t sizeof_nvs_data_list;
   uint32_t addr;
   void *p_data;
@@ -196,10 +214,12 @@ void sys_nvs_load_all(void)
     p_data = (void *)(addr + nvs_data_list[i].offset);
     var_len = (size_t)nvs_data_list[i].size;
 
-    if (nvs_get_blob(m_nvs_handle, nvs_data_list[i].key, p_data, &var_len) != ESP_OK)
+    err = nvs_get_blob(m_nvs_handle, nvs_data_list[i].key, p_data, &var_len);
+    if (err != ESP_OK)
     {
+      ESP_LOGE(TAG, "NVS get blod error: %s", esp_err_to_name(err));
       ESP_LOGE(TAG, "NVS load all data error");
-      bsp_error_handler(BSP_ERR_NVS_COMMUNICATION);
+      bsp_error_add(BSP_ERR_NVS_COMMUNICATION);
     }
   }
 }
@@ -208,47 +228,69 @@ void sys_nvs_store(char * p_key_name, void * p_src, uint32_t len)
 {
   assert(p_key_name != NULL);
   assert(p_src != NULL);
+  esp_err_t err;
 
-  if (nvs_set_blob(m_nvs_handle, p_key_name, p_src, len) != ESP_OK)
+  err = nvs_set_blob(m_nvs_handle, p_key_name, p_src, len);
+  if (err != ESP_OK)
+  {
+    ESP_LOGE(TAG, "NVS set blod error: %s", esp_err_to_name(err));
     goto _LBL_END_;
+  }
 
-  if (nvs_commit(m_nvs_handle) != ESP_OK)
+  err = nvs_commit(m_nvs_handle);
+  if (err != ESP_OK)
+  {
+    ESP_LOGE(TAG, "NVS commit error: %s", esp_err_to_name(err));
     goto _LBL_END_;
+  }
 
   return;
 
 _LBL_END_:
 
   ESP_LOGE(TAG, "NVS store data error");
-  bsp_error_handler(BSP_ERR_NVS_COMMUNICATION);
+  bsp_error_add(BSP_ERR_NVS_COMMUNICATION);
 }
 
 void sys_nvs_load(char *p_key_name, void *p_des, uint32_t len)
 {
   assert(p_key_name != NULL);
   assert(p_des != NULL);
+  esp_err_t err;
 
-  if (nvs_get_blob(m_nvs_handle, p_key_name, p_des, (size_t *)&len) != ESP_OK)
+  err = nvs_get_blob(m_nvs_handle, p_key_name, p_des, (size_t *)&len);
+  if (err != ESP_OK)
   {
+    ESP_LOGE(TAG, "NVS get blod error: %s", esp_err_to_name(err));
     ESP_LOGE(TAG, "NVS load data error");
-    bsp_error_handler(BSP_ERR_NVS_COMMUNICATION);
+    bsp_error_add(BSP_ERR_NVS_COMMUNICATION);
   }
 }
 
 void sys_nvs_factory_reset(void)
 {
-  if (nvs_erase_all(m_nvs_handle) != ESP_OK)
-    goto _LBL_END_;
+  esp_err_t err;
 
-  if (nvs_commit(m_nvs_handle) != ESP_OK)
+  err = nvs_erase_all(m_nvs_handle);
+  if (err != ESP_OK)
+  {
+    ESP_LOGE(TAG, "NVS erase all error: %s", esp_err_to_name(err));
     goto _LBL_END_;
+  }
+
+  err = nvs_commit(m_nvs_handle);
+  if (err != ESP_OK)
+  {
+    ESP_LOGE(TAG, "NVS commit error: %s", esp_err_to_name(err));
+    goto _LBL_END_;
+  }
 
   return;
 
 _LBL_END_:
 
   ESP_LOGE(TAG, "NVS factory reset failed");
-  bsp_error_handler(BSP_ERR_NVS_COMMUNICATION);
+  bsp_error_add(BSP_ERR_NVS_COMMUNICATION);
 }
 
 char *sys_nvs_lookup_key(uint32_t offset, uint32_t size)

@@ -23,30 +23,6 @@ extern "C" {
 
 /* Public defines ----------------------------------------------------------- */
 /* Public enumerate/structure ----------------------------------------------- */
-typedef enum
-{
-  BSP_ERR_NONE
-
-  //                                            |-------- 1: On-chip, 2: Off-chip
-  //                                             ||------ 00 - 99: Peripheral type
-  //                                               ||---- 00 - 99: Error code
-  ,BSP_ERR_SD_INIT                            = 20000
-  ,BSP_ERR_SD_COMMUNICATION                   = 20001
-  
-  ,BSP_ERR_IOE_INIT                           = 20100
-  ,BSP_ERR_IOE_COMMUNICATION                  = 20101
-
-  ,BSP_ERR_TEMPERATURE_INIT                   = 20200
-  ,BSP_ERR_TEMPERATURE_COMMUNICATION          = 20201
-
-  ,BSP_ERR_RTC_INIT                           = 20300
-  ,BSP_ERR_RTC_COMMUNICATION                  = 20301
-
-  ,BSP_ERR_NVS_INIT                           = 20400
-  ,BSP_ERR_NVS_COMMUNICATION                  = 20401
-}
-bsp_error_t;
-
 /* Public Constants --------------------------------------------------------- */
 /* Public variables --------------------------------------------------------- */
 /* Public macros ------------------------------------------------------------ */
@@ -58,8 +34,6 @@ bsp_error_t;
  * 
  * @return        None
  */
-void bsp_error_handler(bsp_error_t error);
-
 void bsp_delay_ms(uint32_t ms);
 
 void bsp_spiffs_init(void);

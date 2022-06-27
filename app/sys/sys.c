@@ -21,19 +21,64 @@
 #include "sys_aws.h"
 #include "sys_ota.h"
 #include "sys_http_server.h"
+#include "bsp_error.h"
 
 /* Private defines ---------------------------------------------------- */
 static const char *TAG = "sys";
 
-
+#define SYS_EVENT_TBL_IT(evt)    {evt, #evt}
 
 /* Private enumerate/structure ---------------------------------------- */
+typedef struct
+{
+  system_event_id_t event;
+  const char *msg;
+}
+sys_event_msg_t;
+
 /* Private macros ----------------------------------------------------- */
 /* Public variables --------------------------------------------------- */
 sys_device_t g_device;
 EventGroupHandle_t g_sys_evt_group;
 
 /* Private variables -------------------------------------------------- */
+static const sys_event_msg_t SYS_EVENT_MSG_TABLE[] = 
+{
+  SYS_EVENT_TBL_IT(SYSTEM_EVENT_WIFI_READY),
+  SYS_EVENT_TBL_IT(SYSTEM_EVENT_SCAN_DONE),
+  SYS_EVENT_TBL_IT(SYSTEM_EVENT_STA_START),
+  SYS_EVENT_TBL_IT(SYSTEM_EVENT_STA_STOP),
+  SYS_EVENT_TBL_IT(SYSTEM_EVENT_STA_CONNECTED ),
+  SYS_EVENT_TBL_IT(SYSTEM_EVENT_STA_DISCONNECTED),
+  SYS_EVENT_TBL_IT(SYSTEM_EVENT_STA_AUTHMODE_CHANGE),
+  SYS_EVENT_TBL_IT(SYSTEM_EVENT_STA_GOT_IP),
+  SYS_EVENT_TBL_IT(SYSTEM_EVENT_STA_LOST_IP),
+  SYS_EVENT_TBL_IT(SYSTEM_EVENT_STA_BSS_RSSI_LOW),
+  SYS_EVENT_TBL_IT(SYSTEM_EVENT_STA_WPS_ER_SUCCESS),
+  SYS_EVENT_TBL_IT(SYSTEM_EVENT_STA_WPS_ER_FAILED),
+  SYS_EVENT_TBL_IT(SYSTEM_EVENT_STA_WPS_ER_TIMEOUT),
+  SYS_EVENT_TBL_IT(SYSTEM_EVENT_STA_WPS_ER_PIN),
+  SYS_EVENT_TBL_IT(SYSTEM_EVENT_STA_WPS_ER_PBC_OVERLAP),
+  SYS_EVENT_TBL_IT(SYSTEM_EVENT_AP_START),
+  SYS_EVENT_TBL_IT(SYSTEM_EVENT_AP_STOP),
+  SYS_EVENT_TBL_IT(SYSTEM_EVENT_AP_STACONNECTED),
+  SYS_EVENT_TBL_IT(SYSTEM_EVENT_AP_STADISCONNECTED),
+  SYS_EVENT_TBL_IT(SYSTEM_EVENT_AP_STAIPASSIGNED),
+  SYS_EVENT_TBL_IT(SYSTEM_EVENT_AP_PROBEREQRECVED),
+  SYS_EVENT_TBL_IT(SYSTEM_EVENT_ACTION_TX_STATUS),
+  SYS_EVENT_TBL_IT(SYSTEM_EVENT_ROC_DONE),
+  SYS_EVENT_TBL_IT(SYSTEM_EVENT_STA_BEACON_TIMEOUT),
+  SYS_EVENT_TBL_IT(SYSTEM_EVENT_FTM_REPORT),
+  SYS_EVENT_TBL_IT(SYSTEM_EVENT_GOT_IP6),
+  SYS_EVENT_TBL_IT(SYSTEM_EVENT_ETH_START),
+  SYS_EVENT_TBL_IT(SYSTEM_EVENT_ETH_STOP ),
+  SYS_EVENT_TBL_IT(SYSTEM_EVENT_ETH_CONNECTED),
+  SYS_EVENT_TBL_IT(SYSTEM_EVENT_ETH_DISCONNECTED),
+  SYS_EVENT_TBL_IT(SYSTEM_EVENT_ETH_GOT_IP),
+  SYS_EVENT_TBL_IT(SYSTEM_EVENT_ETH_LOST_IP),
+  SYS_EVENT_TBL_IT(SYSTEM_EVENT_MAX)
+};
+
 /* Private Constants -------------------------------------------------- */
 /* Private function prototypes ---------------------------------------- */
 static void m_sys_evt_group_init(void);
@@ -46,6 +91,7 @@ void sys_boot(void)
   sys_nvs_init();
   bsp_spiffs_init();
   m_sys_evt_group_init();
+  bsp_error_init();
 
   // WiFi Setup ---------------------------------- {
   sys_wifi_init();
@@ -183,6 +229,22 @@ void sys_event_group_clear(const EventBits_t bit_to_clear)
   if (g_sys_evt_group != NULL)
     xEventGroupClearBits(g_sys_evt_group, bit_to_clear);
 }
+
+const char *sys_event_id_to_name(system_event_id_t evt)
+{
+  for (uint16_t i = 0; i < sizeof(SYS_EVENT_MSG_TABLE) / sizeof(SYS_EVENT_MSG_TABLE[0]); ++i)
+  {
+    if (SYS_EVENT_MSG_TABLE[i].event == evt)
+    {
+      return SYS_EVENT_MSG_TABLE[i].msg;
+    }
+  }
+
+  return "EVENT NONE";
+}
+
+
+
 
 /* Private function --------------------------------------------------------- */
 /**

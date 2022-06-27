@@ -142,6 +142,33 @@ void sys_aws_reconnect_manual(void)
     ESP_LOGW(TAG, "Manual Reconnect Failed - %d", status);
 }
 
+void sys_aws_send_error_code(void)
+{
+  uint16_t err_num;
+
+  ESP_LOGI(TAG, "Read and checking error code in NVS");
+
+  if ((g_sys_aws.initialized == true) && (AWS_PROVISION_DONE == g_nvs_setting_data.provision_status))
+  {
+    err_num = bsp_error_read_start();
+
+    if (err_num == 0)
+      ESP_LOGI(TAG, "No error code");
+    else
+      ESP_LOGI(TAG, "Number of error code: %d", err_num);
+
+    while (err_num != 0)
+    {
+      g_nvs_setting_data.bsp_error.err_code = bsp_error_read();
+      err_num--;
+
+      sys_aws_shadow_update(SYS_AWS_ERROR_CODE);
+
+      ESP_LOGW(TAG, "Send error handler: %d",  g_nvs_setting_data.bsp_error.err_code);
+    }
+  }
+}
+
 /* Private function definitions --------------------------------------------- */
 /**
  * @brief         AWS task
@@ -165,6 +192,9 @@ static void m_sys_aws_task(void *params)
 
   // Shadow service
   sys_aws_shadow_init();
+
+  // Send error code
+  sys_aws_send_error_code();
 
   // Jobs service
   sys_aws_jobs_init(&g_sys_aws.client, g_nvs_setting_data.thing_name, m_sys_aws_jobs_next_job_callback);

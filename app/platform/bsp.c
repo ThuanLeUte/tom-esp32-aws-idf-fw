@@ -25,11 +25,6 @@ static char *TAG = "bsp";
 
 /* Private prototypes ------------------------------------------------------- */
 /* Public APIs -------------------------------------------------------------- */
-void bsp_error_handler(bsp_error_t error)
-{
-  ESP_LOGE(TAG, "BS_ERROR: %d", error);
-}
-
 void bsp_delay_ms(uint32_t ms)
 {
   vTaskDelay(pdMS_TO_TICKS(ms));

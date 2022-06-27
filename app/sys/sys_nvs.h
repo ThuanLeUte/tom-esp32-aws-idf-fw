@@ -17,6 +17,7 @@
 /* Includes ----------------------------------------------------------- */
 #include "platform_common.h"
 #include "sys_wifi.h"
+#include "bsp_error.h"
 
 /* Public defines ----------------------------------------------------- */
 // IMPORTANT: The revision of nvs_data_t. Everytime nvs_data_t is changed, 
@@ -70,6 +71,8 @@ typedef struct nvs_data_struct
     uint16_t scale_tare;
   }
   properties;
+
+  bsp_error_t bsp_error;
 }
 nvs_data_t;
 

@@ -80,6 +80,8 @@ void sys_event_group_set(const EventBits_t bit_to_set);
  */
 void sys_event_group_clear(const EventBits_t bit_to_clear);
 
+const char *sys_event_id_to_name(system_event_id_t evt);
+
 #endif // __SYS_H
 
 /* End of file -------------------------------------------------------- */

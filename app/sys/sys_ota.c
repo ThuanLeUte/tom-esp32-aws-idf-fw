@@ -188,12 +188,15 @@ static bool m_sys_ota_process(const char *http_url)
     .event_handler = m_http_event_handler,
   };
 
-  esp_err_t ret = esp_https_ota(&config);
-  if (ESP_OK == ret)
-    return true;
+  esp_err_t err = esp_https_ota(&config);
+  if (ESP_OK != err)
+  {
+    ESP_LOGE(TAG, "Esp https ota error: %s", esp_err_to_name(err));
+    ESP_LOGE(TAG, "Firmware upgrade failed");
+    return false;
+  }
 
-  ESP_LOGE(TAG, "Firmware upgrade failed");
-  return false;
+  return true;
 }
 
 /* End of file -------------------------------------------------------------- */

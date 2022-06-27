@@ -2,6 +2,7 @@ set(COMPONENT_ADD_INCLUDEDIRS "aws-iot-device-sdk-embedded-C/include"
                               "include")
 set(aws_sdk_dir aws-iot-device-sdk-embedded-C/src)
 set(COMPONENT_SRCS "${aws_sdk_dir}/aws_iot_jobs_interface.c"
+                   "${aws_sdk_dir}/aws_iot_error.c"
                    "${aws_sdk_dir}/aws_iot_jobs_json.c"
                    "${aws_sdk_dir}/aws_iot_jobs_topics.c"
                    "${aws_sdk_dir}/aws_iot_jobs_types.c"

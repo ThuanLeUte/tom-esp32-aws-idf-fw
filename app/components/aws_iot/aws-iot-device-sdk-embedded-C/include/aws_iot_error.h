@@ -163,4 +163,6 @@ typedef enum {
 }
 #endif
 
+const char *aws_error_to_name(IoT_Error_t code);
+
 #endif /* AWS_IOT_SDK_SRC_IOT_ERROR_H_ */
