@@ -100,7 +100,8 @@ void sys_nvs_init(void)
     goto _LBL_END_;
 
   // Open NVS
-  if (nvs_open(NVS_STORAGE_SPACENAME, NVS_READWRITE, &m_nvs_handle) != ESP_OK)
+  err = nvs_open(NVS_STORAGE_SPACENAME, NVS_READWRITE, &m_nvs_handle);
+  if (err != ESP_OK)
     goto _LBL_END_;
 
   // Get NVS data version
@@ -123,10 +124,12 @@ void sys_nvs_init(void)
     sys_nvs_store_all();
 
     // Update new NVS data version
-    if (nvs_set_u32(m_nvs_handle, NVS_VERSION_KEY_NAME, g_nvs_setting_data.data_version) != ESP_OK)
+    err = nvs_set_u32(m_nvs_handle, NVS_VERSION_KEY_NAME, g_nvs_setting_data.data_version);
+    if (err != ESP_OK)
       goto _LBL_END_;
 
-    if (nvs_commit(m_nvs_handle) != ESP_OK)
+    err = nvs_commit(m_nvs_handle);
+    if (err != ESP_OK)
       goto _LBL_END_;
   }
   else
@@ -143,6 +146,7 @@ void sys_nvs_init(void)
 _LBL_END_:
 
   ESP_LOGE(TAG, "NVS storage init faild");
+  BSP_ERROR_DISPLAY(err);
   bsp_error_add(BSP_ERR_NVS_INIT);
 }
 
@@ -153,6 +157,7 @@ void sys_nvs_deinit(void)
 
 void sys_nvs_store_all(void)
 {
+  esp_err_t err;
   uint16_t sizeof_nvs_data_list;
   uint32_t addr;
   void *p_data;
@@ -167,11 +172,13 @@ void sys_nvs_store_all(void)
     p_data = (void *)(addr + nvs_data_list[i].offset);
     var_len = (size_t)nvs_data_list[i].size;
 
-    if (nvs_set_blob(m_nvs_handle, nvs_data_list[i].key, p_data, var_len) != ESP_OK)
+    err = nvs_set_blob(m_nvs_handle, nvs_data_list[i].key, p_data, var_len);
+    if (err != ESP_OK)
      goto _LBL_END_;
 
     // Commit written value
-    if (nvs_commit(m_nvs_handle) != ESP_OK)
+    err = nvs_commit(m_nvs_handle);
+    if (err != ESP_OK)
       goto _LBL_END_;
   }
 
@@ -180,11 +187,13 @@ void sys_nvs_store_all(void)
 _LBL_END_:
 
   ESP_LOGE(TAG, "NVS store all data error");
+  BSP_ERROR_DISPLAY(err);
   bsp_error_add(BSP_ERR_NVS_COMMUNICATION);
 }
 
 void sys_nvs_load_all(void)
 {
+  esp_err_t err;
   uint16_t sizeof_nvs_data_list;
   uint32_t addr;
   void *p_data;
@@ -199,9 +208,11 @@ void sys_nvs_load_all(void)
     p_data = (void *)(addr + nvs_data_list[i].offset);
     var_len = (size_t)nvs_data_list[i].size;
 
-    if (nvs_get_blob(m_nvs_handle, nvs_data_list[i].key, p_data, &var_len) != ESP_OK)
+    err = nvs_get_blob(m_nvs_handle, nvs_data_list[i].key, p_data, &var_len);
+    if (err != ESP_OK)
     {
       ESP_LOGE(TAG, "NVS load all data error");
+      BSP_ERROR_DISPLAY(err);
       bsp_error_add(BSP_ERR_NVS_COMMUNICATION);
     }
   }
@@ -211,11 +222,14 @@ void sys_nvs_store(char * p_key_name, void * p_src, uint32_t len)
 {
   assert(p_key_name != NULL);
   assert(p_src != NULL);
+  esp_err_t err;
 
-  if (nvs_set_blob(m_nvs_handle, p_key_name, p_src, len) != ESP_OK)
+  err = nvs_set_blob(m_nvs_handle, p_key_name, p_src, len);
+  if (err != ESP_OK)
     goto _LBL_END_;
 
-  if (nvs_commit(m_nvs_handle) != ESP_OK)
+  err = nvs_commit(m_nvs_handle);
+  if (err != ESP_OK)
     goto _LBL_END_;
 
   return;
@@ -223,6 +237,7 @@ void sys_nvs_store(char * p_key_name, void * p_src, uint32_t len)
 _LBL_END_:
 
   ESP_LOGE(TAG, "NVS store data error");
+  BSP_ERROR_DISPLAY(err);
   bsp_error_add(BSP_ERR_NVS_COMMUNICATION);
 }
 
@@ -230,20 +245,27 @@ void sys_nvs_load(char *p_key_name, void *p_des, uint32_t len)
 {
   assert(p_key_name != NULL);
   assert(p_des != NULL);
+  esp_err_t err;
 
-  if (nvs_get_blob(m_nvs_handle, p_key_name, p_des, (size_t *)&len) != ESP_OK)
+  err = nvs_get_blob(m_nvs_handle, p_key_name, p_des, (size_t *)&len);
+  if (err != ESP_OK)
   {
     ESP_LOGE(TAG, "NVS load data error");
+    BSP_ERROR_DISPLAY(err);
     bsp_error_add(BSP_ERR_NVS_COMMUNICATION);
   }
 }
 
 void sys_nvs_factory_reset(void)
 {
-  if (nvs_erase_all(m_nvs_handle) != ESP_OK)
+  esp_err_t err;
+
+  err = nvs_erase_all(m_nvs_handle);
+  if (err != ESP_OK)
     goto _LBL_END_;
 
-  if (nvs_commit(m_nvs_handle) != ESP_OK)
+  err = nvs_commit(m_nvs_handle);
+  if (err != ESP_OK)
     goto _LBL_END_;
 
   return;
@@ -251,6 +273,7 @@ void sys_nvs_factory_reset(void)
 _LBL_END_:
 
   ESP_LOGE(TAG, "NVS factory reset failed");
+  BSP_ERROR_DISPLAY(err);
   bsp_error_add(BSP_ERR_NVS_COMMUNICATION);
 }
 

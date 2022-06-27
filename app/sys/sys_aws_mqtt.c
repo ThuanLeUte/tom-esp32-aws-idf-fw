@@ -87,7 +87,7 @@ void sys_aws_mqtt_trigger_publish(sys_aws_mqtt_pub_topic_t topic)
 
 bool sys_aws_mqtt_subscribe(sys_aws_mqtt_sub_topic_t topic)
 {
-  IoT_Error_t rc;
+  IoT_Error_t err;
 
   static char aws_sub_topic[100];
 
@@ -95,12 +95,12 @@ bool sys_aws_mqtt_subscribe(sys_aws_mqtt_sub_topic_t topic)
 
   ESP_LOGI(TAG, "Subscribing...: %s", aws_sub_topic);
 
-  rc = aws_iot_mqtt_subscribe(&g_sys_aws.client, aws_sub_topic, strlen(aws_sub_topic), QOS0,
+  err = aws_iot_mqtt_subscribe(&g_sys_aws.client, aws_sub_topic, strlen(aws_sub_topic), QOS0,
                               m_sys_aws_subscribe_callback_handler, NULL);
 
-  if (SUCCESS != rc)
+  if (err != SUCCESS)
   {
-    ESP_LOGI(TAG, "Error subscribing : %d ", rc);
+    ESP_LOGI(TAG, "Subscribing error: %s", aws_error_to_name(err));
     return false;
   }
 
@@ -109,7 +109,7 @@ bool sys_aws_mqtt_subscribe(sys_aws_mqtt_sub_topic_t topic)
 
 bool sys_aws_mqtt_publish(sys_aws_mqtt_pub_topic_t topic, char *buf)
 {
-  IoT_Error_t rc;
+  IoT_Error_t err;
   IoT_Publish_Message_Params params_publish_msg;
 
   static char aws_pub_topic[100];
@@ -123,11 +123,11 @@ bool sys_aws_mqtt_publish(sys_aws_mqtt_pub_topic_t topic, char *buf)
 
   printf("Payload: %s \n", buf);
 
-  rc = aws_iot_mqtt_publish(&g_sys_aws.client, aws_pub_topic, strlen(aws_pub_topic), &params_publish_msg);
+  err = aws_iot_mqtt_publish(&g_sys_aws.client, aws_pub_topic, strlen(aws_pub_topic), &params_publish_msg);
 
-  if (SUCCESS != rc)
+  if (err != SUCCESS)
   {
-    ESP_LOGI(TAG, "Error publishing : %d ", rc);
+    ESP_LOGI(TAG, "Publishing error: %s", aws_error_to_name(err));
     return false;
   }
 

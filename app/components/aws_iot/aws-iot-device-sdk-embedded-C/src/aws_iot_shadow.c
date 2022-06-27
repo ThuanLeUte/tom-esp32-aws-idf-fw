@@ -115,7 +115,7 @@ IoT_Error_t aws_iot_shadow_connect(AWS_IoT_Client *pClient, const ShadowConnectP
 		FUNC_EXIT_RC(NULL_VALUE_ERROR);
 	}
 
-	ESP_LOGE("TAG", "Thing name 1: %s", pParams->pMyThingName);
+	ESP_LOGW("TAG", "Thing name 1: %s", pParams->pMyThingName);
 	snprintf(myThingName, 100, "%s", pParams->pMyThingName);
 	snprintf(mqttClientID, MAX_SIZE_OF_UNIQUE_CLIENT_ID_BYTES, "%s", pParams->pMqttClientId);
 

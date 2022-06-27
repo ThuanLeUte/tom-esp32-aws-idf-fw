@@ -1,0 +1,111 @@
+/**
+ * @file       aws_iot_error.c
+ * @copyright  Copyright (C) 2021 Hydratech. All rights reserved.
+ * @license    This project is released under the Hydratech License.
+ * @version    1.0.0
+ * @date       2022-01-24
+ * @author     Thuan Le
+ * @brief      Board Support Error Handler
+ * @note       None
+ * @example    None
+ */
+
+/* Includes ----------------------------------------------------------------- */
+#include "aws_iot_error.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+/* Private defines ---------------------------------------------------------- */
+#define AWS_ERR_TBL_IT(err)    {err, #err}
+
+/* Private enumerate/structure ---------------------------------------------- */
+typedef struct
+{
+  IoT_Error_t code;
+  const char *msg;
+}
+aws_err_msg_t;
+
+/* Public variables --------------------------------------------------------- */
+/* Private variables -------------------------------------------------------- */
+static const aws_err_msg_t AWS_ERR_MSG_TABLE[] = 
+{
+  AWS_ERR_TBL_IT(NETWORK_PHYSICAL_LAYER_CONNECTED),
+  AWS_ERR_TBL_IT(NETWORK_MANUALLY_DISCONNECTED),
+  AWS_ERR_TBL_IT(NETWORK_ATTEMPTING_RECONNECT),
+  AWS_ERR_TBL_IT(NETWORK_RECONNECTED),
+  AWS_ERR_TBL_IT(MQTT_NOTHING_TO_READ),
+  AWS_ERR_TBL_IT(MQTT_CONNACK_CONNECTION_ACCEPTED),
+  AWS_ERR_TBL_IT(SUCCESS),
+  AWS_ERR_TBL_IT(FAILURE),
+  AWS_ERR_TBL_IT(NULL_VALUE_ERROR),
+  AWS_ERR_TBL_IT(TCP_CONNECTION_ERROR),
+  AWS_ERR_TBL_IT(SSL_CONNECTION_ERROR),
+  AWS_ERR_TBL_IT(TCP_SETUP_ERROR),
+  AWS_ERR_TBL_IT(NETWORK_SSL_CONNECT_TIMEOUT_ERROR),
+  AWS_ERR_TBL_IT(NETWORK_SSL_WRITE_ERROR),
+  AWS_ERR_TBL_IT(NETWORK_SSL_INIT_ERROR),
+  AWS_ERR_TBL_IT(NETWORK_SSL_CERT_ERROR),
+  AWS_ERR_TBL_IT(NETWORK_SSL_WRITE_TIMEOUT_ERROR),
+  AWS_ERR_TBL_IT(NETWORK_SSL_READ_TIMEOUT_ERROR),
+  AWS_ERR_TBL_IT(NETWORK_SSL_READ_ERROR),
+  AWS_ERR_TBL_IT(NETWORK_DISCONNECTED_ERROR),
+  AWS_ERR_TBL_IT(NETWORK_RECONNECT_TIMED_OUT_ERROR),
+  AWS_ERR_TBL_IT(NETWORK_ALREADY_CONNECTED_ERROR),
+  AWS_ERR_TBL_IT(NETWORK_MBEDTLS_ERR_CTR_DRBG_ENTROPY_SOURCE_FAILED),
+  AWS_ERR_TBL_IT(NETWORK_SSL_UNKNOWN_ERROR),
+  AWS_ERR_TBL_IT(NETWORK_PHYSICAL_LAYER_DISCONNECTED),
+  AWS_ERR_TBL_IT(NETWORK_X509_ROOT_CRT_PARSE_ERROR),
+  AWS_ERR_TBL_IT(NETWORK_X509_DEVICE_CRT_PARSE_ERROR),
+  AWS_ERR_TBL_IT(NETWORK_PK_PRIVATE_KEY_PARSE_ERROR),
+  AWS_ERR_TBL_IT(NETWORK_ERR_NET_SOCKET_FAILED),
+  AWS_ERR_TBL_IT(NETWORK_ERR_NET_UNKNOWN_HOST),
+  AWS_ERR_TBL_IT(NETWORK_ERR_NET_CONNECT_FAILED),
+  AWS_ERR_TBL_IT(NETWORK_SSL_NOTHING_TO_READ),
+  AWS_ERR_TBL_IT(MQTT_CONNECTION_ERROR),
+  AWS_ERR_TBL_IT(MQTT_CONNECT_TIMEOUT_ERROR),
+  AWS_ERR_TBL_IT(MQTT_REQUEST_TIMEOUT_ERROR),
+  AWS_ERR_TBL_IT(MQTT_UNEXPECTED_CLIENT_STATE_ERROR),
+  AWS_ERR_TBL_IT(MQTT_CLIENT_NOT_IDLE_ERROR),
+  AWS_ERR_TBL_IT(MQTT_RX_MESSAGE_PACKET_TYPE_INVALID_ERROR),
+  AWS_ERR_TBL_IT(MQTT_RX_BUFFER_TOO_SHORT_ERROR),
+  AWS_ERR_TBL_IT(MQTT_TX_BUFFER_TOO_SHORT_ERROR),
+  AWS_ERR_TBL_IT(NETWORK_PK_PRIVATE_KEY_PARSE_ERROR),
+  AWS_ERR_TBL_IT(MQTT_MAX_SUBSCRIPTIONS_REACHED_ERROR),
+  AWS_ERR_TBL_IT(MQTT_DECODE_REMAINING_LENGTH_ERROR),
+  AWS_ERR_TBL_IT(MQTT_CONNACK_UNKNOWN_ERROR),
+  AWS_ERR_TBL_IT(MQTT_CONNACK_UNACCEPTABLE_PROTOCOL_VERSION_ERROR),
+  AWS_ERR_TBL_IT(MQTT_CONNACK_IDENTIFIER_REJECTED_ERROR),
+  AWS_ERR_TBL_IT(MQTT_CONNACK_SERVER_UNAVAILABLE_ERROR),
+  AWS_ERR_TBL_IT(MQTT_CONNACK_BAD_USERDATA_ERROR),
+  AWS_ERR_TBL_IT(MQTT_CONNACK_NOT_AUTHORIZED_ERROR),
+  AWS_ERR_TBL_IT(JSON_PARSE_ERROR),
+  AWS_ERR_TBL_IT(SHADOW_WAIT_FOR_PUBLISH),
+  AWS_ERR_TBL_IT(SHADOW_JSON_BUFFER_TRUNCATED),
+  AWS_ERR_TBL_IT(SHADOW_JSON_ERROR),
+  AWS_ERR_TBL_IT(MUTEX_INIT_ERROR),
+  AWS_ERR_TBL_IT(MUTEX_LOCK_ERROR),
+  AWS_ERR_TBL_IT(MUTEX_UNLOCK_ERROR),
+  AWS_ERR_TBL_IT(MUTEX_DESTROY_ERROR),
+  AWS_ERR_TBL_IT(MAX_SIZE_ERROR),
+  AWS_ERR_TBL_IT(LIMIT_EXCEEDED_ERROR),
+  AWS_ERR_TBL_IT(INVALID_TOPIC_TYPE_ERROR)
+};
+
+/* Private function prototypes ---------------------------------------------- */
+/* Function definitions ----------------------------------------------------- */
+const char *aws_error_to_name(IoT_Error_t code)
+{
+  for (uint16_t i = 0; i < sizeof(AWS_ERR_MSG_TABLE) / sizeof(AWS_ERR_MSG_TABLE[0]); ++i)
+  {
+    if (AWS_ERR_MSG_TABLE[i].code == code)
+    {
+      return AWS_ERR_MSG_TABLE[i].msg;
+    }
+  }
+
+  return "ERROR";
+}
+
+/* Private function --------------------------------------------------------- */
+/* End of file -------------------------------------------------------------- */

@@ -55,7 +55,7 @@ void sys_aws_jobs_send_update(const char *job_id, JobExecutionStatus status)
   AwsIotJobExecutionUpdateRequest update_request;
   char topic_to_publish_update[MAX_JOB_TOPIC_LENGTH_BYTES];
   char message_buffer[200];
-  IoT_Error_t rc = FAILURE;
+  IoT_Error_t err = FAILURE;
 
   update_request.status                   = status;
   update_request.statusDetails            = NULL;
@@ -65,10 +65,13 @@ void sys_aws_jobs_send_update(const char *job_id, JobExecutionStatus status)
   update_request.includeJobDocument       = false;
   update_request.clientToken              = NULL;
 
-  rc = aws_iot_jobs_send_update(m_client, QOS0, m_thing_name, job_id, &update_request,
+  err = aws_iot_jobs_send_update(m_client, QOS0, m_thing_name, job_id, &update_request,
                                 topic_to_publish_update, sizeof(topic_to_publish_update), message_buffer, sizeof(message_buffer));
 
-  ESP_LOGI(TAG_JOB, "Error: %d, aws_iot_jobs_send_update: %s", rc, topic_to_publish_update);
+  ESP_LOGI(TAG_JOB, "AWS jobs send update: %s", topic_to_publish_update);
+
+  if (err != SUCCESS)
+    ESP_LOGI(TAG_JOB, "AWS jobs send update error: %s", aws_error_to_name(err));
 }
 
 inline void __attribute__((always_inline)) sys_aws_jobs_init(AWS_IoT_Client *p_client, const char *thing_name, pApplicationHandler_t p_next_job_cb)
@@ -88,41 +91,56 @@ inline void __attribute__((always_inline)) sys_aws_jobs_init(AWS_IoT_Client *p_c
   describe_request.includeJobDocument = true;
   describe_request.clientToken        = NULL;
 
-  IoT_Error_t rc = FAILURE;
+  IoT_Error_t err = FAILURE;
 
-  rc = aws_iot_jobs_subscribe_to_job_messages(p_client, QOS0, thing_name,
+  err = aws_iot_jobs_subscribe_to_job_messages(p_client, QOS0, thing_name,
                                               NULL, JOB_NOTIFY_NEXT_TOPIC, JOB_REQUEST_TYPE,
                                               p_next_job_cb, NULL, topic_to_subscribe_notify_next,
                                               sizeof(topic_to_subscribe_notify_next));
+  if (err != SUCCESS)
+  {
+    ESP_LOGI(TAG_JOB, "Subscribe to JOB_NOTIFY_NEXT_TOPIC error: %s", aws_error_to_name(err));
+    return;
+  }
 
-  ESP_LOGI(TAG_JOB, "Error: %d, JOB_NOTIFY_NEXT_TOPIC  : %s", rc, topic_to_subscribe_notify_next);
+  err = aws_iot_jobs_subscribe_to_job_messages(p_client, QOS0, thing_name,
+                                               JOB_ID_NEXT, JOB_DESCRIBE_TOPIC, JOB_WILDCARD_REPLY_TYPE,
+                                               p_next_job_cb, NULL, topic_to_subscribe_get_next,
+                                               sizeof(topic_to_subscribe_get_next));
+  if (err != SUCCESS)
+  {
+    ESP_LOGI(TAG_JOB, "Subscribe to JOB_DESCRIBE_TOPIC error: %s", aws_error_to_name(err));
+    return;
+  }
 
-  rc = aws_iot_jobs_subscribe_to_job_messages(p_client, QOS0, thing_name,
-                                              JOB_ID_NEXT, JOB_DESCRIBE_TOPIC, JOB_WILDCARD_REPLY_TYPE,
-                                              p_next_job_cb, NULL, topic_to_subscribe_get_next,
-                                              sizeof(topic_to_subscribe_get_next));
+  err = aws_iot_jobs_subscribe_to_job_messages(p_client, QOS0, thing_name,
+                                               JOB_ID_WILDCARD, JOB_UPDATE_TOPIC, JOB_ACCEPTED_REPLY_TYPE,
+                                               m_sys_aws_jobs_update_accepted_callback, NULL, topic_to_subscribe_update_accepted,
+                                               sizeof(topic_to_subscribe_update_accepted));
+  if (err != SUCCESS)
+  {
+    ESP_LOGI(TAG_JOB, "Subscribe to JOB_UPDATE_TOPIC error: %s", aws_error_to_name(err));
+    return;
+  }
 
-  ESP_LOGI(TAG_JOB, "Error: %d, JOB_DESCRIBE_TOPIC     : %s", rc, topic_to_subscribe_get_next);
+  err = aws_iot_jobs_subscribe_to_job_messages(p_client, QOS0, thing_name,
+                                               JOB_ID_WILDCARD, JOB_UPDATE_TOPIC, JOB_REJECTED_REPLY_TYPE,
+                                               m_sys_aws_jobs_update_rejected_callback, NULL, topic_to_subscribe_update_rejected,
+                                               sizeof(topic_to_subscribe_update_rejected));
+  if (err != SUCCESS)
+  {
+    ESP_LOGI(TAG_JOB, "Subscribe to JOB_UPDATE_TOPIC error: %s", aws_error_to_name(err));
+    return;
+  }
 
-  rc = aws_iot_jobs_subscribe_to_job_messages(p_client, QOS0, thing_name,
-                                              JOB_ID_WILDCARD, JOB_UPDATE_TOPIC, JOB_ACCEPTED_REPLY_TYPE,
-                                              m_sys_aws_jobs_update_accepted_callback, NULL, topic_to_subscribe_update_accepted,
-                                              sizeof(topic_to_subscribe_update_accepted));
-
-  ESP_LOGI(TAG_JOB, "Error: %d, JOB_UPDATE_TOPIC       : %s", rc, topic_to_subscribe_update_accepted);
-
-  rc = aws_iot_jobs_subscribe_to_job_messages(p_client, QOS0, thing_name,
-                                              JOB_ID_WILDCARD, JOB_UPDATE_TOPIC, JOB_REJECTED_REPLY_TYPE,
-                                              m_sys_aws_jobs_update_rejected_callback, NULL, topic_to_subscribe_update_rejected,
-                                              sizeof(topic_to_subscribe_update_rejected));
-
-  ESP_LOGI(TAG_JOB, "Error: %d, JOB_UPDATE_TOPIC       : %s", rc, topic_to_subscribe_update_rejected);
-
-  rc = aws_iot_jobs_describe(p_client, QOS0, thing_name,
-                             JOB_ID_NEXT, &describe_request, topic_to_publish_get_next,
-                             sizeof(topic_to_publish_get_next), NULL, 0);
-
-  ESP_LOGI(TAG_JOB, "Error: %d, JOB_DESCRIBE_TOPIC  : %s", rc, topic_to_publish_get_next);
+  err = aws_iot_jobs_describe(p_client, QOS0, thing_name,
+                              JOB_ID_NEXT, &describe_request, topic_to_publish_get_next,
+                              sizeof(topic_to_publish_get_next), NULL, 0);
+  if (err != SUCCESS)
+  {
+    ESP_LOGI(TAG_JOB, "Job describe error: %s", aws_error_to_name(err));
+    return;
+  }
 
   aws_iot_mqtt_yield(p_client, 1000);
 }

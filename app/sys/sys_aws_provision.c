@@ -142,6 +142,7 @@ static void m_sys_aws_provision_task(void *params)
  */
 static bool m_sys_aws_connect(void)
 {
+  IoT_Error_t err;
   IoT_Client_Init_Params    mqtt_init_params = iotClientInitParamsDefault;
   IoT_Client_Connect_Params connect_params   = iotClientConnectParamsDefault;
 
@@ -169,16 +170,29 @@ static bool m_sys_aws_connect(void)
 
   // AWS mqtt init
   ESP_LOGI(TAG, "AWS init...");
-  CHECK(SUCCESS == aws_iot_mqtt_init(&m_aws_client, &mqtt_init_params), false);
+  err = aws_iot_mqtt_init(&m_aws_client, &mqtt_init_params);
+  if (err != SUCCESS)
+  {
+    ESP_LOGE(TAG, "AWS init error: %s", aws_error_to_name(err));
+    return false;
+  }
 
   // Connecting to AWS
   ESP_LOGI(TAG, "AWS connect...");
-  IoT_Error_t err;
   err = aws_iot_mqtt_connect(&m_aws_client, &connect_params);
-  ESP_LOGI(TAG, "AWS connect error: %d", err);
+  if (err != SUCCESS)
+  {
+    ESP_LOGI(TAG, "AWS connect error: %s", aws_error_to_name(err));
+    return false;
+  }
 
   // AWS auto reconnect set
-  CHECK(SUCCESS == aws_iot_mqtt_autoreconnect_set_status(&m_aws_client, true), false);
+  err = aws_iot_mqtt_autoreconnect_set_status(&m_aws_client, true);
+  if (err != SUCCESS)
+  {
+    ESP_LOGE(TAG, "AWS auto reconnect set status error: %s", aws_error_to_name(err));
+    return false;
+  }
 
   return true;
 }
@@ -196,14 +210,21 @@ static bool m_sys_aws_connect(void)
  */
 static bool m_sys_aws_enable_monitor(void)
 {
+  IoT_Error_t err;
+
   ESP_LOGI(TAG, "Subscribing to monitor topic...");
   for (int i = 0; i < AWS_PROVISION_NUM_SUBSCRIBE_TOPIC; i++)
   {
-    CHECK(SUCCESS == aws_iot_mqtt_subscribe(&m_aws_client, AWS_SUBSCRIBE_TOPIC[i],
-                                            strlen(AWS_SUBSCRIBE_TOPIC[i]),
-                                            QOS1,
-                                            m_sys_aws_subscribe_callback_handler,
-                                            NULL), false);
+    err = aws_iot_mqtt_subscribe(&m_aws_client, AWS_SUBSCRIBE_TOPIC[i],
+                                 strlen(AWS_SUBSCRIBE_TOPIC[i]),
+                                 QOS1,
+                                 m_sys_aws_subscribe_callback_handler,
+                                 NULL);
+    if (err != SUCCESS)
+    {
+      ESP_LOGE(TAG, "Subscribing to monitor topic error: %s", aws_error_to_name(err));
+      return false;
+    }
   }
 
   return true;
@@ -222,6 +243,8 @@ static bool m_sys_aws_enable_monitor(void)
  */
 static bool m_sys_aws_get_official_certs(void)
 {
+  IoT_Error_t err = FAILURE;
+
   const char *payload             = "{}";
   m_params_publish_msg.payload    = (void *)payload;
   m_params_publish_msg.payloadLen = strlen(payload);
@@ -230,10 +253,15 @@ static bool m_sys_aws_get_official_certs(void)
 
   // Make a publish call to topic to get official certs
   ESP_LOGI(TAG, "Get official certs...");
-  CHECK(SUCCESS == aws_iot_mqtt_publish(&m_aws_client,
-                                        AWS_CERTIFICATE_CREATE_TOPIC,
-                                        strlen(AWS_CERTIFICATE_CREATE_TOPIC),
-                                        &m_params_publish_msg), false);
+  err = aws_iot_mqtt_publish(&m_aws_client,
+                             AWS_CERTIFICATE_CREATE_TOPIC,
+                             strlen(AWS_CERTIFICATE_CREATE_TOPIC),
+                             &m_params_publish_msg);
+  if (err != SUCCESS)
+  {
+    ESP_LOGE(TAG, "Subscribing to monitor topic error: %s", aws_error_to_name(err));
+    return false;
+  }
 
   return true;
 }
@@ -252,6 +280,7 @@ static bool m_sys_aws_get_official_certs(void)
  */
 static bool m_sys_aws_register_thing(char *token, int token_len)
 {
+  IoT_Error_t err;
   char buf[1000] = "";
   struct json_out out = JSON_OUT_BUF(buf, sizeof(buf));
 
@@ -268,10 +297,16 @@ static bool m_sys_aws_register_thing(char *token, int token_len)
 
   // Register thing / activate certificate
   ESP_LOGI(TAG, "Register thing...: %s", buf);
-  CHECK(SUCCESS == aws_iot_mqtt_publish(&m_aws_client,
-                                        AWS_REGISTER_THING_TOPIC,
-                                        strlen(AWS_REGISTER_THING_TOPIC),
-                                        &m_params_publish_msg), false);
+  err = aws_iot_mqtt_publish(&m_aws_client,
+                             AWS_REGISTER_THING_TOPIC,
+                             strlen(AWS_REGISTER_THING_TOPIC),
+                             &m_params_publish_msg);
+
+  if (err != SUCCESS)
+  {
+    ESP_LOGE(TAG, "Register thing error: %s", aws_error_to_name(err));
+    return false;
+  }
 
   return true;
 }
