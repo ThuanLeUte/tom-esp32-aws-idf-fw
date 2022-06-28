@@ -449,27 +449,25 @@ static void m_wifi_softap_device_handler(void *arg, esp_event_base_t event_base,
   wifi_event_ap_staconnected_t    *event_connected    = (wifi_event_ap_staconnected_t *)event_data;
   wifi_event_ap_stadisconnected_t *event_disconnected = (wifi_event_ap_stadisconnected_t *)event_data;
 
-  ESP_LOGI(TAG, "Event: %s", sys_event_id_to_name(event_id));
-
   switch (event_id)
   {
-  case SYSTEM_EVENT_SCAN_DONE:
+  case WIFI_EVENT_SCAN_DONE:
     ESP_LOGI(TAG, "Scan done");
     m_wifi.is_scan_done = true;
     break;
 
-  case SYSTEM_EVENT_STA_CONNECTED:
+  case WIFI_EVENT_STA_CONNECTED:
     ESP_LOGI(TAG, "Connected!");
     m_wifi.is_connected = true;
     break;
 
-  case SYSTEM_EVENT_AP_STACONNECTED:
+  case WIFI_EVENT_AP_STACONNECTED:
     ESP_LOGI(TAG, "station " MACSTR " join, AID=%d", MAC2STR(event_connected->mac), event_connected->aid);
 
     station_cnt++;
     break;
 
-  case SYSTEM_EVENT_AP_STADISCONNECTED:
+  case WIFI_EVENT_AP_STADISCONNECTED:
     ESP_LOGI(TAG, "station " MACSTR " leave, AID=%d", MAC2STR(event_disconnected->mac), event_disconnected->aid);
 
     station_cnt--;
@@ -482,7 +480,7 @@ static void m_wifi_softap_device_handler(void *arg, esp_event_base_t event_base,
 
 static void m_sys_wifi_softap_expired_callback(void *para)
 {
-  ESP_LOGI(TAG, "m_sys_wifi_softap_expired_callback!");
+  ESP_LOGI(TAG, "Wifi softap expired callback, Station count: %d", station_cnt);
 
   if (station_cnt != 0)
     bsp_tmr_auto_restart(&m_wifi_softap_atm);
